@@ -1,19 +1,46 @@
 import 'package:flutter/material.dart';
+
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pharmacy/controllers/products_controller.dart';
 import 'package:pharmacy/controllers/users_controller.dart';
+import 'package:pharmacy/models/products.dart';
 import 'package:pharmacy/models/users.dart';
 
-class UpdateUser extends StatelessWidget {
-  final TextEditingController _fullName = TextEditingController();
-  final TextEditingController _phoneNumber = TextEditingController();
-  //final TextEditingController _role = TextEditingController();
-  final TextEditingController _sellingPoint = TextEditingController();
-  final TextEditingController _password = TextEditingController();
-  final TextEditingController _userState = TextEditingController();
-  String? _selectedUserState;
+class UpdateProduct extends StatefulWidget {
+  final String productCode;
+  const UpdateProduct({super.key, required this.productCode});
 
-  UpdateUser({super.key});
+  @override
+  State<UpdateProduct> createState() => _UpdateProductState();
+}
+
+class _UpdateProductState extends State<UpdateProduct> {
+  late TextEditingController _productCodeController;
+
+  final TextEditingController _productName = TextEditingController();
+
+  final TextEditingController _purchasePrice = TextEditingController();
+
+  final TextEditingController _quantity = TextEditingController();
+
+  final TextEditingController _expiryDate = TextEditingController();
+
+  DateTime? _selectedDate;
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _productCodeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _productCodeController = TextEditingController(text: widget.productCode);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +80,7 @@ class UpdateUser extends StatelessWidget {
                       height: 20,
                     ),
                     const Text(
-                      'Modifiez les informations de l\'utilisateur',
+                      'Modifier les informations du produit',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey),
                     ),
@@ -61,9 +88,9 @@ class UpdateUser extends StatelessWidget {
                       height: 20,
                     ),
                     const Padding(
-                      padding: EdgeInsets.only(right: 240.0),
+                      padding: EdgeInsets.only(right: 200.0),
                       child: Text(
-                        'Téléphone',
+                        'Code du produit',
                         textAlign: TextAlign.start,
                         style: TextStyle(
                             color: Colors.blue, fontWeight: FontWeight.bold),
@@ -73,8 +100,9 @@ class UpdateUser extends StatelessWidget {
                       height: 10,
                     ),
                     TextField(
-                      controller: _phoneNumber,
+                      controller: _productCodeController,
                       cursorColor: Colors.grey,
+                      enabled: false,
                       decoration: InputDecoration(
                         // labelText: 'Tél',
                         // labelStyle: const TextStyle(
@@ -91,7 +119,7 @@ class UpdateUser extends StatelessWidget {
                           borderSide: const BorderSide(color: Colors.grey),
                         ),
                         prefixIcon: const Icon(
-                          Icons.phone_android_rounded,
+                          Icons.qr_code,
                           color: Colors.blue,
                         ),
                         //floatingLabelBehavior: FloatingLabelBehavior.never
@@ -101,9 +129,9 @@ class UpdateUser extends StatelessWidget {
                       height: 16,
                     ),
                     const Padding(
-                      padding: EdgeInsets.only(right: 220.0),
+                      padding: EdgeInsets.only(right: 200.0),
                       child: Text(
-                        'Mot de passe',
+                        'Nom du produit',
                         textAlign: TextAlign.start,
                         style: TextStyle(
                             color: Colors.blue, fontWeight: FontWeight.bold),
@@ -113,7 +141,7 @@ class UpdateUser extends StatelessWidget {
                       height: 10,
                     ),
                     TextField(
-                      controller: _password,
+                      controller: _productName,
                       cursorColor: Colors.grey,
                       decoration: InputDecoration(
                         //labelText: 'Mot de passe',
@@ -131,7 +159,7 @@ class UpdateUser extends StatelessWidget {
                           ),
                         ),
                         prefixIcon: const Icon(
-                          Icons.lock,
+                          Icons.medication_liquid_sharp,
                           color: Colors.blue,
                         ),
                       ),
@@ -140,9 +168,9 @@ class UpdateUser extends StatelessWidget {
                       height: 16,
                     ),
                     const Padding(
-                      padding: EdgeInsets.only(right: 260.0),
+                      padding: EdgeInsets.only(right: 230.0),
                       child: Text(
-                        'Noms',
+                        'Prix d\'achat',
                         textAlign: TextAlign.start,
                         style: TextStyle(
                             color: Colors.blue, fontWeight: FontWeight.bold),
@@ -152,7 +180,7 @@ class UpdateUser extends StatelessWidget {
                       height: 10,
                     ),
                     TextField(
-                      controller: _fullName,
+                      controller: _purchasePrice,
                       cursorColor: Colors.grey,
                       decoration: InputDecoration(
                         //labelText: 'Noms',
@@ -170,7 +198,7 @@ class UpdateUser extends StatelessWidget {
                           ),
                         ),
                         prefixIcon: const Icon(
-                          Icons.person, // Adjust icon as needed
+                          Icons.monetization_on, // Adjust icon as needed
                           color: Colors.blue,
                         ),
                       ),
@@ -179,9 +207,9 @@ class UpdateUser extends StatelessWidget {
                       height: 16,
                     ),
                     const Padding(
-                      padding: EdgeInsets.only(right: 200.0),
+                      padding: EdgeInsets.only(right: 250.0),
                       child: Text(
-                        'Point de vente',
+                        'Quantité',
                         textAlign: TextAlign.start,
                         style: TextStyle(
                             color: Colors.blue, fontWeight: FontWeight.bold),
@@ -191,7 +219,7 @@ class UpdateUser extends StatelessWidget {
                       height: 10,
                     ),
                     TextField(
-                      controller: _sellingPoint,
+                      controller: _quantity,
                       cursorColor: Colors.grey,
                       decoration: InputDecoration(
                         // labelText: 'Point de vente',
@@ -209,7 +237,7 @@ class UpdateUser extends StatelessWidget {
                           ),
                         ),
                         prefixIcon: const Icon(
-                          Icons.store, // Adjust icon as needed
+                          Icons.numbers, // Adjust icon as needed
                           color: Colors.blue,
                         ),
                       ),
@@ -220,7 +248,7 @@ class UpdateUser extends StatelessWidget {
                     const Padding(
                       padding: EdgeInsets.only(right: 200.0),
                       child: Text(
-                        'Etat d\'utilisateur',
+                        'Date d\'expiration',
                         textAlign: TextAlign.start,
                         style: TextStyle(
                             color: Colors.blue, fontWeight: FontWeight.bold),
@@ -229,30 +257,11 @@ class UpdateUser extends StatelessWidget {
                     const SizedBox(
                       height: 10,
                     ),
-                    DropdownButtonFormField<String>(
-                      value: _selectedUserState,
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'Allowed',
-                          child: Text(
-                            'Allowed',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Denied',
-                          child: Text(
-                            'Denied',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                      ],
-                      onChanged: (String? newValue) {
-                        // setState(() {
-                        //   _selectedUserState = newValue;
-                        // });
-                      },
+                    TextFormField(
+                      controller: _expiryDate,
+                      cursorColor: Colors.grey,
                       decoration: InputDecoration(
+                        // labelText: 'Role',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(50),
                         ),
@@ -266,34 +275,60 @@ class UpdateUser extends StatelessWidget {
                             color: Colors.grey,
                           ),
                         ),
+                        prefixIcon: const Icon(
+                          Icons.calendar_today, // Adjust icon as needed
+                          color: Colors.blue,
+                        ),
                       ),
+                      onTap: () async {
+                        DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(2050),
+                            initialDate: DateTime.now());
+                        if (pickedDate != null) {
+                          setState(() {
+                            _selectedDate = pickedDate;
+                            _expiryDate.text = _selectedDate!
+                                .toIso8601String()
+                                .split('T')
+                                .first;
+                          });
+                        }
+                      },
                     ),
                     const SizedBox(
                       height: 16,
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        String phoneNumber = _phoneNumber.text;
-                        String password = _password.text;
-                        String fullName = _fullName.text;
-                        String sellingPoint = _sellingPoint.text;
-                        //String role = _role.text;
+                        // String productCode = _productCode.text;
+                        String productName = _productName.text;
+                        String quantityStr = _quantity.text;
+                        String purchasePriceStr = _purchasePrice.text;
+                        String expiryDateStr = _expiryDate.text;
 
-                        User updatedUser = User(
-                          fullName: fullName,
-                          phoneNumber: phoneNumber,
-                          password: password,
-                          sellingPoint: sellingPoint,
-                          //  role: role
-                        );
-                        // UsersController().addUser(newUser, () {
-                        //   Fluttertoast.showToast(msg: 'Données modifiées');
-                        // });
-                        _fullName.clear();
-                        _password.clear();
-                        _phoneNumber.clear();
-                        //_role.clear();
-                        _sellingPoint.clear();
+                        int quantity = int.tryParse(quantityStr) ?? 0;
+                        DateTime? expiryDate = expiryDateStr.isNotEmpty
+                            ? DateTime.tryParse(expiryDateStr)
+                            : null;
+                        double purchasePrice =
+                            double.tryParse(purchasePriceStr) ?? 0.0;
+
+                        Product updatedProduct = Product(
+                            productCode: widget.productCode,
+                            productName: productName,
+                            purchasePrice: purchasePrice,
+                            expiryDate: expiryDate,
+                            quantity: quantity);
+                        ProductsController().updateProduct(updatedProduct, () {
+                          Fluttertoast.showToast(msg: 'Données modifiées');
+                        });
+                        _expiryDate.clear();
+                        //  _productCode.clear();
+                        _productName.clear();
+                        _purchasePrice.clear();
+                        _quantity.clear();
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue),

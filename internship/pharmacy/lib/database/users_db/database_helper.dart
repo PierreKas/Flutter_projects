@@ -3,7 +3,7 @@ import 'package:pharmacy/controllers/users_controller.dart';
 import 'package:pharmacy/models/users.dart';
 
 class DatabaseHelper {
-  final String host = '192.168.2.10';
+  final String host = '192.168.0.173';
   final int port = 3306;
   final String username = 'root';
   final String password = 'KASANANI';

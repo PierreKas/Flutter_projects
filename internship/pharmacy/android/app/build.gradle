@@ -24,6 +24,7 @@ if (flutterVersionName == null) {
 }
 
 android {
+    compileSdkVersion 33
     namespace = "com.example.pharmacy"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -42,6 +43,14 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
+    //     ndk {
+    //     abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+    // }
+    }
+    signingConfigs {
+        debug {
+            v2SigningEnabled false
+        }
     }
 
     buildTypes {

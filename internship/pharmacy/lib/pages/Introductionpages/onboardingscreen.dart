@@ -124,7 +124,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         _resetTimer();
                         Navigator.push(context,
                             MaterialPageRoute(builder: (context) {
-                          return const ProductsList();
+                          return const Home();
                         }));
                       },
                       child: const Text(

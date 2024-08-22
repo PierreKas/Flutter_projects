@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharmacy/views/products/products_list.dart';
 import 'package:pharmacy/views/users/users_list.dart';
 
 class Home extends StatelessWidget {
@@ -42,7 +43,12 @@ class Home extends StatelessWidget {
             ),
             ListTile(
               title: const Text('Produits'),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProductsList()),
+                );
+              },
             ),
             ListTile(
               title: const Text('Ventes'),
