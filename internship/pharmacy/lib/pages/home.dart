@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pharmacy/views/products/products_list.dart';
+import 'package:pharmacy/views/selling/daily_transactions.dart';
+import 'package:pharmacy/views/selling/selling_form.dart';
 import 'package:pharmacy/views/users/users_list.dart';
 
 class Home extends StatelessWidget {
@@ -52,7 +54,35 @@ class Home extends StatelessWidget {
             ),
             ListTile(
               title: const Text('Ventes'),
-              onTap: () {},
+              onTap: () {
+                DateTime selectedDate = DateTime.now();
+                DateTime dateOnly = DateTime(
+                    selectedDate.year, selectedDate.month, selectedDate.day);
+/**
+ * 
+ *  DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        firstDate: DateTime(2024),
+                        lastDate: DateTime(2025),
+                        initialDate: DateTime(2024));
+                    if (pickedDate != null) {
+                      setState(() {
+                        _selectedDate = pickedDate;
+                        _searchedDate.text =
+                            _selectedDate!.toIso8601String().split('T').first;
+                      });
+                    }
+ */
+                // setState(() {
+                //         _selectedDate = pickedDate;
+                //         _searchedDate.text =
+                //             _selectedDate!.toIso8601String().split('T').first;
+                //       });
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SellingForm()),
+                );
+              },
             )
           ],
         ),

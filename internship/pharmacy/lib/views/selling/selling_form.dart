@@ -1,30 +1,53 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter/widgets.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:pharmacy/controllers/products_controller.dart';
+import 'package:pharmacy/controllers/selling_controller.dart';
+import 'package:pharmacy/models/selling.dart';
 
-import 'package:pharmacy/models/products.dart';
-
-class AddProduct extends StatefulWidget {
-  const AddProduct({super.key});
+class SellingForm extends StatefulWidget {
+  const SellingForm({super.key});
 
   @override
-  State<AddProduct> createState() => _AddProductState();
+  State<SellingForm> createState() => _AddProductState();
 }
 
-class _AddProductState extends State<AddProduct> {
+class _AddProductState extends State<SellingForm> {
   final TextEditingController _productCode = TextEditingController();
 
-  final TextEditingController _productName = TextEditingController();
+  final TextEditingController _unitPrice = TextEditingController();
 
-  final TextEditingController _purchasePrice = TextEditingController();
+  final TextEditingController _totalPrice = TextEditingController();
 
   final TextEditingController _quantity = TextEditingController();
 
-  final TextEditingController _expiryDate = TextEditingController();
+  final TextEditingController _sellerPhoneNumber = TextEditingController();
 
-  DateTime? _selectedDate;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _quantity.addListener(_calculateTotalPrice);
+    _unitPrice.addListener(_calculateTotalPrice);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _productCode.dispose();
+    _unitPrice.dispose();
+    _totalPrice.dispose();
+    _quantity.dispose();
+    _sellerPhoneNumber.dispose();
+    super.dispose();
+  }
+
+  void _calculateTotalPrice() {
+    int quantity = int.tryParse(_quantity.text) ?? 0;
+    double unitPrice = double.tryParse(_unitPrice.text) ?? 0.0;
+    double totalPrice = quantity * unitPrice;
+    setState(() {
+      _totalPrice.text = totalPrice.toStringAsFixed(2);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,18 +76,48 @@ class _AddProductState extends State<AddProduct> {
                 padding: const EdgeInsets.symmetric(horizontal: 25),
                 child: Column(
                   children: [
-                    const Text(
-                      'YEREMIYA PHARMACY',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Color.fromARGB(255, 73, 71, 71)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        const Text(
+                          'YEREMIYA PHARMACY',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              color: Color.fromARGB(255, 73, 71, 71)),
+                        ),
+                        const SizedBox(
+                          width: 60,
+                        ),
+                        GestureDetector(
+                            onTap: () {
+                              ListTile(
+                                trailing: PopupMenuButton(
+                                    itemBuilder: (context) => [
+                                          PopupMenuItem(
+                                            //value: ,
+                                            child: const Text(
+                                                'Daily transactions'),
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        const SellingForm()),
+                                              );
+                                            },
+                                          )
+                                        ]),
+                              );
+                            },
+                            child: const Icon(Icons.more_vert))
+                      ],
                     ),
                     const SizedBox(
                       height: 20,
                     ),
                     const Text(
-                      'Ajouter un nouveau produit au stock',
+                      'Enregistrer les ventes sur via cette page',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey),
                     ),
@@ -114,7 +167,7 @@ class _AddProductState extends State<AddProduct> {
                     const Padding(
                       padding: EdgeInsets.only(right: 200.0),
                       child: Text(
-                        'Nom du produit',
+                        'Prix unitaire',
                         textAlign: TextAlign.start,
                         style: TextStyle(
                             color: Colors.blue, fontWeight: FontWeight.bold),
@@ -124,7 +177,7 @@ class _AddProductState extends State<AddProduct> {
                       height: 10,
                     ),
                     TextField(
-                      controller: _productName,
+                      controller: _unitPrice,
                       cursorColor: Colors.grey,
                       decoration: InputDecoration(
                         //labelText: 'Mot de passe',
@@ -142,46 +195,7 @@ class _AddProductState extends State<AddProduct> {
                           ),
                         ),
                         prefixIcon: const Icon(
-                          Icons.medication_liquid_sharp,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 230.0),
-                      child: Text(
-                        'Prix d\'achat',
-                        textAlign: TextAlign.start,
-                        style: TextStyle(
-                            color: Colors.blue, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    TextField(
-                      controller: _purchasePrice,
-                      cursorColor: Colors.grey,
-                      decoration: InputDecoration(
-                        //labelText: 'Noms',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(60.0),
-                          borderSide: const BorderSide(color: Colors.blue),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(80.0),
-                          borderSide: const BorderSide(
-                            color: Colors.grey,
-                          ),
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.monetization_on, // Adjust icon as needed
+                          Icons.monetization_on_outlined,
                           color: Colors.blue,
                         ),
                       ),
@@ -229,9 +243,49 @@ class _AddProductState extends State<AddProduct> {
                       height: 16,
                     ),
                     const Padding(
-                      padding: EdgeInsets.only(right: 200.0),
+                      padding: EdgeInsets.only(right: 230.0),
                       child: Text(
-                        'Date d\'expiration',
+                        'Prix total',
+                        textAlign: TextAlign.start,
+                        style: TextStyle(
+                            color: Colors.blue, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextField(
+                      controller: _totalPrice,
+                      cursorColor: Colors.grey,
+                      enabled: false,
+                      decoration: InputDecoration(
+                        //labelText: 'Noms',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(60.0),
+                          borderSide: const BorderSide(color: Colors.blue),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(80.0),
+                          borderSide: const BorderSide(
+                            color: Colors.grey,
+                          ),
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.monetization_on, // Adjust icon as needed
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(right: 150.0),
+                      child: Text(
+                        'Numéro du revendeur',
                         textAlign: TextAlign.start,
                         style: TextStyle(
                             color: Colors.blue, fontWeight: FontWeight.bold),
@@ -241,7 +295,7 @@ class _AddProductState extends State<AddProduct> {
                       height: 10,
                     ),
                     TextFormField(
-                      controller: _expiryDate,
+                      controller: _sellerPhoneNumber,
                       cursorColor: Colors.grey,
                       decoration: InputDecoration(
                         // labelText: 'Role',
@@ -259,26 +313,10 @@ class _AddProductState extends State<AddProduct> {
                           ),
                         ),
                         prefixIcon: const Icon(
-                          Icons.calendar_today, // Adjust icon as needed
+                          Icons.phone, // Adjust icon as needed
                           color: Colors.blue,
                         ),
                       ),
-                      onTap: () async {
-                        DateTime? pickedDate = await showDatePicker(
-                            context: context,
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime(2050),
-                            initialDate: DateTime.now());
-                        if (pickedDate != null) {
-                          setState(() {
-                            _selectedDate = pickedDate;
-                            _expiryDate.text = _selectedDate!
-                                .toIso8601String()
-                                .split('T')
-                                .first;
-                          });
-                        }
-                      },
                     ),
                     const SizedBox(
                       height: 16,
@@ -286,31 +324,27 @@ class _AddProductState extends State<AddProduct> {
                     ElevatedButton(
                       onPressed: () {
                         String productCode = _productCode.text;
-                        String productName = _productName.text;
+                        String unitPriceStr = _unitPrice.text;
                         String quantityStr = _quantity.text;
-                        String purchasePriceStr = _purchasePrice.text;
-                        String expiryDateStr = _expiryDate.text;
+                        String totalPriceStr = _totalPrice.text;
+                        String sellerPhoneNumber = _sellerPhoneNumber.text;
 
                         int quantity = int.tryParse(quantityStr) ?? 0;
-                        DateTime? expiryDate = expiryDateStr.isNotEmpty
-                            ? DateTime.tryParse(expiryDateStr)
-                            : null;
-                        double purchasePrice =
-                            double.tryParse(purchasePriceStr) ?? 0.0;
+                        double unitPrice = double.tryParse(unitPriceStr) ?? 0.0;
+                        double totalPrice =
+                            double.tryParse(totalPriceStr) ?? 0.0;
 
-                        Product newProduct = Product(
+                        Selling newTransaction = Selling(
                             productCode: productCode,
-                            productName: productName,
-                            purchasePrice: purchasePrice,
-                            expiryDate: expiryDate,
+                            unitPrice: unitPrice,
+                            totalPrice: totalPrice,
+                            sellerPhoneNumber: sellerPhoneNumber,
                             quantity: quantity);
-                        ProductsController().addProduct(newProduct, () {
-                          Fluttertoast.showToast(msg: 'Produit ajouté');
-                        });
-                        _expiryDate.clear();
+                        SellsController().addTransaction(newTransaction, () {});
+                        _sellerPhoneNumber.clear();
                         _productCode.clear();
-                        _productName.clear();
-                        _purchasePrice.clear();
+                        _totalPrice.clear();
+                        _unitPrice.clear();
                         _quantity.clear();
                       },
                       style: ElevatedButton.styleFrom(

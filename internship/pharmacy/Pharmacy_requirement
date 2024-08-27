@@ -1,0 +1,22 @@
+1. Login page with Admin default login(Make it the first page after onboarding)
+2. After login I put a home page which will contain the menu  that guides to :
+	- Users	(CRUD)
+	- Product (CRUD)
+	- Selling (CRUD)
+	
+3. Only Admin can access all these menus
+4. The Manager can access product and Selling options
+5. The Seller will access only the Selling option
+
+
+Download:
+1. Excell
+2. PDF
+
+A faire:
+Chercher les transactions par date
+Generer les productCode automatiquement
+
+
+DropdownButton
+PopupMenuButton

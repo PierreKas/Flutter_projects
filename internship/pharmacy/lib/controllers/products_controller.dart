@@ -13,7 +13,7 @@ class ProductsController {
     }
 
     try {
-      DatabaseHelper dbHelper = DatabaseHelper();
+      ProductDatabaseHelper dbHelper = ProductDatabaseHelper();
       await dbHelper.addProductToDB(product);
       productsList.add(product);
       callback();
@@ -25,7 +25,7 @@ class ProductsController {
 
   Future<void> deleteProduct(String productCode, Function callback) async {
     try {
-      DatabaseHelper dbHelper = DatabaseHelper();
+      ProductDatabaseHelper dbHelper = ProductDatabaseHelper();
       bool isDeleted = await dbHelper.deleteProductToDB(productCode);
       if (isDeleted) {
         productsList
@@ -50,7 +50,7 @@ class ProductsController {
       return;
     }
     try {
-      DatabaseHelper dbHelper = DatabaseHelper();
+      ProductDatabaseHelper dbHelper = ProductDatabaseHelper();
       await dbHelper.updateProductInDB(product);
       int index =
           productsList.indexWhere((p) => p.productCode == product.productCode);
@@ -66,7 +66,7 @@ class ProductsController {
 
   Future<void> getProducts(Function callback) async {
     try {
-      DatabaseHelper dbHelper = DatabaseHelper();
+      ProductDatabaseHelper dbHelper = ProductDatabaseHelper();
       List<Map<String, dynamic>> productsData =
           await dbHelper.getProductsToDB();
 
@@ -101,7 +101,7 @@ class ProductsController {
 
   Future<void> getProductInfo(String productCode, Function callback) async {
     try {
-      DatabaseHelper dbHelper = DatabaseHelper();
+      ProductDatabaseHelper dbHelper = ProductDatabaseHelper();
       Map<String, dynamic>? productData =
           await dbHelper.getProductInfoToDB(productCode);
 

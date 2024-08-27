@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:pharmacy/controllers/users_controller.dart';
 import 'package:pharmacy/models/users.dart';
 
 class UpdateUser extends StatelessWidget {

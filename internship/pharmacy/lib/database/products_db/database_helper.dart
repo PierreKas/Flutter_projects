@@ -1,35 +1,10 @@
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:mysql_client/mysql_client.dart';
+import 'package:pharmacy/database/conn_string.dart';
 import 'package:pharmacy/models/products.dart';
 
-class DatabaseHelper {
-  final String host = '192.168.0.173';
-  final int port = 3306;
-  final String username = 'root';
-  final String password = 'KASANANI';
-  final String databaseName = 'pharmacy_management_system_db';
-
-  Future<MySQLConnection> _getConnection() async {
-    try {
-      final conn = await MySQLConnection.createConnection(
-        host: host,
-        port: port,
-        userName: username,
-        password: password,
-        databaseName: databaseName,
-      );
-
-      await conn.connect();
-      print('DB connected successfully');
-      return conn;
-    } catch (e) {
-      print('Error connecting to the database: $e');
-      rethrow;
-    }
-  }
-
+class ProductDatabaseHelper {
   Future<List<Map<String, dynamic>>> getProductsToDB() async {
-    final conn = await _getConnection();
+    final conn = await DatabaseHelper.getConnection();
     const sql = 'SELECT * FROM products';
 
     try {
@@ -47,7 +22,7 @@ class DatabaseHelper {
   }
 
   Future<Map<String, dynamic>?> getProductInfoToDB(String productCode) async {
-    final conn = await _getConnection();
+    final conn = await DatabaseHelper.getConnection();
 
     const sql = 'SELECT * FROM products WHERE product_code= :productCode';
 
@@ -73,14 +48,14 @@ class DatabaseHelper {
   }
 
   Future<bool> deleteProductToDB(String productCode) async {
-    final conn = await _getConnection();
+    final conn = await DatabaseHelper.getConnection();
 
     const sql = 'DELETE FROM products WHERE product_code= :productCode';
 
     try {
       final results = await conn.execute(sql, {'productCode': productCode});
       if (results.rows.isNotEmpty) {
-        final product = results.rows.first.assoc();
+        results.rows.first.assoc();
         print('Product deleted successfully');
         Fluttertoast.showToast(msg: 'Product deleted successfully');
         return true;
@@ -99,7 +74,7 @@ class DatabaseHelper {
   }
 
   Future<void> addProductToDB(Product product) async {
-    final conn = await _getConnection();
+    final conn = await DatabaseHelper.getConnection();
     final sql = '''
     INSERT INTO products (product_code, product_name, purchase_price, quantity, expiry_date) 
     VALUES (
@@ -123,7 +98,7 @@ class DatabaseHelper {
   }
 
   Future<Map<String, dynamic>?> updateProductInDB(Product product) async {
-    final conn = await _getConnection();
+    final conn = await DatabaseHelper.getConnection();
 
     final sql = '''
   UPDATE products 

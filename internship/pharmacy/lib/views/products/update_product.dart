@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pharmacy/controllers/products_controller.dart';
-import 'package:pharmacy/controllers/users_controller.dart';
 import 'package:pharmacy/models/products.dart';
-import 'package:pharmacy/models/users.dart';
 
 class UpdateProduct extends StatefulWidget {
   final String productCode;

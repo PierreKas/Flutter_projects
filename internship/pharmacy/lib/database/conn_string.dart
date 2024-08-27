@@ -1,27 +1,17 @@
 import 'package:mysql_client/mysql_client.dart';
 
 class DatabaseHelper {
-  // Private constructor
-  DatabaseHelper._privateConstructor();
-
-  // The single instance of the class
-  static final DatabaseHelper _instance = DatabaseHelper._privateConstructor();
-
-  // Factory method to return the single instance
-  factory DatabaseHelper() {
-    return _instance;
-  }
-
   // Database connection details
-  final String host = '192.168.2.10';
-  final int port = 3306;
-  final String username = 'root';
-  final String password = 'KASANANI';
-  final String databaseName = 'pharmacy_management_system_db';
-
+  static String host = '192.168.2.11';
+  static int port = 3306;
+  static String username = 'root';
+  static String password = 'KASANANI';
+  static String databaseName = 'pharmacy_management_system_db';
+  static MySQLConnection? conn;
   // Get a connection
-  Future<MySQLConnection> getConnection() async {
-    final conn = await MySQLConnection.createConnection(
+  static Future<MySQLConnection> getConnection() async {
+    if (conn != null && conn?.connected == true) return conn!;
+    conn = await MySQLConnection.createConnection(
       host: host,
       port: port,
       userName: username,
@@ -29,8 +19,8 @@ class DatabaseHelper {
       databaseName: databaseName,
     );
 
-    await conn.connect();
+    await conn!.connect();
     print('DB connected successfully');
-    return conn;
+    return conn!;
   }
 }

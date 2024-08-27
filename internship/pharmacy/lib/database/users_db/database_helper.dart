@@ -1,37 +1,9 @@
-import 'package:mysql_client/mysql_client.dart';
-import 'package:pharmacy/controllers/users_controller.dart';
+import 'package:pharmacy/database/conn_string.dart';
 import 'package:pharmacy/models/users.dart';
 
-class DatabaseHelper {
-  final String host = '192.168.0.173';
-  final int port = 3306;
-  final String username = 'root';
-  final String password = 'KASANANI';
-  final String databaseName = 'pharmacy_management_system_db';
-  // late User userr;
-  // String phone= userr.phoneNumber;
-
-  Future<MySQLConnection> _getConnection() async {
-    try {
-      final conn = await MySQLConnection.createConnection(
-        host: host,
-        port: port,
-        userName: username,
-        password: password,
-        databaseName: databaseName,
-      );
-
-      await conn.connect();
-      print('DB connected successfully');
-      return conn;
-    } catch (e) {
-      print('Error connecting to the database: $e');
-      rethrow;
-    }
-  }
-
+class UsersDatabaseHelper {
   Future<List<Map<String, dynamic>>> getUsersToDB() async {
-    final conn = await _getConnection();
+    final conn = await DatabaseHelper.getConnection();
     const sql = 'SELECT * FROM user';
 
     try {
@@ -65,7 +37,7 @@ class DatabaseHelper {
   //   }
   // }
   Future<void> addUserToDB(User user) async {
-    final conn = await _getConnection();
+    final conn = await DatabaseHelper.getConnection();
     // await conn.execute(
     //     'INSERT INTO user(Full_name,phone_number, role, selling_point, pwd, user_state) VALUES (?,?,?,?,?,?)',
     //     {

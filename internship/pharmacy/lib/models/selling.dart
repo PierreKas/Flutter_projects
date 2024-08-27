@@ -6,7 +6,7 @@ class Selling {
   DateTime? sellingDate;
   double? totalPrice;
   String sellerPhoneNumber;
-  int transactionId;
+  int? transactionId;
 
   Selling({
     this.billCode,
@@ -16,7 +16,7 @@ class Selling {
     this.sellingDate,
     this.totalPrice,
     required this.sellerPhoneNumber,
-    required this.transactionId,
+    this.transactionId,
   });
 
   factory Selling.fromJson(Map<String, dynamic> json) {

@@ -21,7 +21,7 @@ class UsersController {
       return;
     }
     try {
-      DatabaseHelper dbHelper = DatabaseHelper();
+      UsersDatabaseHelper dbHelper = UsersDatabaseHelper();
       await dbHelper.addUserToDB(user);
       usersList.add(user);
       callback();
@@ -34,7 +34,7 @@ class UsersController {
 
   Future<void> getUsers(Function callback) async {
     try {
-      DatabaseHelper dbHelper = DatabaseHelper();
+      UsersDatabaseHelper dbHelper = UsersDatabaseHelper();
       List<Map<String, dynamic>> usersData = await dbHelper.getUsersToDB();
 
       // usersList.clear();

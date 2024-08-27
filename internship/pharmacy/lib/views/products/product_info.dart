@@ -22,14 +22,7 @@ class _ProductInfoState extends State<ProductInfo> {
   }
 
   Future<void> _fetchProductInfo() async {
-    try {
-      final productData = await ProductsController()
-          .getProductInfo(widget.productCode, (product) {
-        setState(() {
-          _product = product;
-        });
-      });
-    } catch (e) {
+    try {} catch (e) {
       print('Error fetching product info: $e');
       Fluttertoast.showToast(msg: 'Error fetching product info: $e');
     }

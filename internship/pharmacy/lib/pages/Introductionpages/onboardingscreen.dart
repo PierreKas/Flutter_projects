@@ -2,15 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pharmacy/pages/Introductionpages/intropage1.dart';
 import 'package:pharmacy/pages/Introductionpages/intropage2.dart';
 import 'package:pharmacy/pages/home.dart';
-import 'package:pharmacy/pages/login_page.dart';
-import 'package:pharmacy/views/products/products_list.dart';
-import 'package:pharmacy/views/users/create_user.dart';
-import 'package:pharmacy/views/users/update_user.dart';
-import 'package:pharmacy/views/users/user_info.dart';
-import 'package:pharmacy/views/users/users_list.dart';
-
 import 'dart:async';
-
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class OnboardingScreen extends StatefulWidget {
