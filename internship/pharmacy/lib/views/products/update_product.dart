@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pharmacy/controllers/products_controller.dart';
 import 'package:pharmacy/models/products.dart';
 
@@ -317,9 +316,8 @@ class _UpdateProductState extends State<UpdateProduct> {
                             purchasePrice: purchasePrice,
                             expiryDate: expiryDate,
                             quantity: quantity);
-                        ProductsController().updateProduct(updatedProduct, () {
-                          Fluttertoast.showToast(msg: 'Données modifiées');
-                        });
+                        ProductsController()
+                            .updateProduct(updatedProduct, () {});
                         _expiryDate.clear();
                         //  _productCode.clear();
                         _productName.clear();

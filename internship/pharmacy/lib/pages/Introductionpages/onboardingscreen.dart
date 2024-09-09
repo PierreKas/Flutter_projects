@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pharmacy/pages/Introductionpages/intropage1.dart';
 import 'package:pharmacy/pages/Introductionpages/intropage2.dart';
-import 'package:pharmacy/pages/home.dart';
+import 'package:pharmacy/pages/login_page.dart';
 import 'dart:async';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -116,7 +116,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         _resetTimer();
                         Navigator.push(context,
                             MaterialPageRoute(builder: (context) {
-                          return const Home();
+                          return LoginPage();
                         }));
                       },
                       child: const Text(

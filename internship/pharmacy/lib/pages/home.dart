@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pharmacy/controllers/users_controller.dart';
+import 'package:pharmacy/pages/login_page.dart';
 import 'package:pharmacy/views/products/products_list.dart';
-import 'package:pharmacy/views/selling/daily_transactions.dart';
 import 'package:pharmacy/views/selling/selling_form.dart';
 import 'package:pharmacy/views/users/users_list.dart';
 
@@ -34,30 +35,30 @@ class Home extends StatelessWidget {
               decoration: BoxDecoration(color: Colors.blue),
               child: Text('Menu'),
             ),
-            ListTile(
-              title: const Text('Utilisateurs'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const UsersList()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Produits'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ProductsList()),
-                );
-              },
-            ),
+            if (UsersController.userRole.toLowerCase() == 'admin')
+              ListTile(
+                title: const Text('Utilisateurs'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const UsersList()),
+                  );
+                },
+              ),
+            if (UsersController.userRole.toLowerCase() != 'seller')
+              ListTile(
+                title: const Text('Produits'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ProductsList()),
+                  );
+                },
+              ),
             ListTile(
               title: const Text('Ventes'),
               onTap: () {
-                DateTime selectedDate = DateTime.now();
-                DateTime dateOnly = DateTime(
-                    selectedDate.year, selectedDate.month, selectedDate.day);
 /**
  * 
  *  DateTime? pickedDate = await showDatePicker(
@@ -83,7 +84,16 @@ class Home extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const SellingForm()),
                 );
               },
-            )
+            ),
+            ListTile(
+              title: const Text('Logout'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                );
+              },
+            ),
           ],
         ),
       ),

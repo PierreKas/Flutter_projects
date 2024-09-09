@@ -2,16 +2,16 @@ class User {
   String fullName;
   String phoneNumber;
   String? role;
-  String? sellingPoint;
-  String? password;
+  String sellingPoint;
+  String password;
   String? userState;
 
   User({
     required this.fullName,
     required this.phoneNumber,
     this.role,
-    this.sellingPoint,
-    this.password,
+    required this.sellingPoint,
+    required this.password,
     this.userState,
   });
 

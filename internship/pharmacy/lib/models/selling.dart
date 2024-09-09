@@ -7,17 +7,18 @@ class Selling {
   double? totalPrice;
   String sellerPhoneNumber;
   int? transactionId;
+  String? productName;
 
-  Selling({
-    this.billCode,
-    this.productCode,
-    this.unitPrice,
-    this.quantity,
-    this.sellingDate,
-    this.totalPrice,
-    required this.sellerPhoneNumber,
-    this.transactionId,
-  });
+  Selling(
+      {this.billCode,
+      this.productCode,
+      this.unitPrice,
+      this.quantity,
+      this.sellingDate,
+      this.totalPrice,
+      required this.sellerPhoneNumber,
+      this.transactionId,
+      this.productName});
 
   factory Selling.fromJson(Map<String, dynamic> json) {
     return Selling(
@@ -31,6 +32,7 @@ class Selling {
       totalPrice: json['total_price'],
       sellerPhoneNumber: json['seller_phone_number'],
       transactionId: json['TransactionId'],
+      productName: json['product_name'],
     );
   }
 
@@ -44,6 +46,7 @@ class Selling {
       'total_price': totalPrice,
       'seller_phone_number': sellerPhoneNumber,
       'TransactionId': transactionId,
+      'product_name': productName,
     };
   }
 }

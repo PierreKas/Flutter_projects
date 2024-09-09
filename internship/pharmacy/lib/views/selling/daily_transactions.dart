@@ -1,4 +1,5 @@
 import 'dart:io';
+//import 'dart:js_interop';
 
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pharmacy/controllers/products_controller.dart';
 import 'package:pharmacy/controllers/selling_controller.dart';
+import 'package:pharmacy/customizable_widget/pdf_generator_widget.dart';
 import 'package:pharmacy/models/selling.dart';
 
 class DailyTransactionsList extends StatefulWidget {
@@ -29,7 +31,6 @@ class _DailyTransactionsList extends State<DailyTransactionsList> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _fetchTransactionsBydate();
     _scrollController.addListener(() {
@@ -59,6 +60,94 @@ class _DailyTransactionsList extends State<DailyTransactionsList> {
       });
     });
   }
+
+  // Future<void> _downloadPDF() async {
+  //   var status = await Permission.storage.request();
+  //   print('Permission Status: $status');
+  //   if (status.isGranted) {
+  //     var pdf = pw.Document();
+
+  //     List<pw.TableRow> tableRows = [
+  //       pw.TableRow(children: [
+  //         pw.Padding(
+  //           padding: const pw.EdgeInsets.all(16),
+  //           child: pw.Text(
+  //             'Product name',
+  //             style: const pw.TextStyle(fontSize: 10, color: PdfColors.black),
+  //           ),
+  //         ),
+  //         pw.Padding(
+  //           padding: const pw.EdgeInsets.all(16),
+  //           child: pw.Text(
+  //             'Unit price',
+  //             style: const pw.TextStyle(fontSize: 10, color: PdfColors.black),
+  //           ),
+  //         ),
+  //         pw.Padding(
+  //           padding: const pw.EdgeInsets.all(18),
+  //           child: pw.Text(
+  //             'Quantity',
+  //             style: const pw.TextStyle(fontSize: 10, color: PdfColors.black),
+  //           ),
+  //         ),
+  //         pw.Padding(
+  //           padding: const pw.EdgeInsets.all(18),
+  //           child: pw.Text(
+  //             'Total price',
+  //             style: const pw.TextStyle(fontSize: 10, color: PdfColors.black),
+  //           ),
+  //         )
+  //       ]),
+  //       for (var selling in _transactions)
+  //         pw.TableRow(children: [
+  //           pw.Padding(
+  //             padding: const pw.EdgeInsets.all(16),
+  //             child: pw.Text(
+  //               selling.productName!,
+  //               style: const pw.TextStyle(fontSize: 10, color: PdfColors.black),
+  //             ),
+  //           ),
+  //           pw.Padding(
+  //             padding: const pw.EdgeInsets.all(16),
+  //             child: pw.Text(
+  //               selling.unitPrice.toString(),
+  //               style: const pw.TextStyle(fontSize: 10, color: PdfColors.black),
+  //             ),
+  //           ),
+  //           pw.Padding(
+  //             padding: const pw.EdgeInsets.all(18),
+  //             child: pw.Text(
+  //               selling.quantity.toString(),
+  //               style: const pw.TextStyle(fontSize: 10, color: PdfColors.black),
+  //             ),
+  //           ),
+  //           pw.Padding(
+  //             padding: const pw.EdgeInsets.all(18),
+  //             child: pw.Text(
+  //               selling.totalPrice.toString(),
+  //               style: const pw.TextStyle(fontSize: 10, color: PdfColors.black),
+  //             ),
+  //           )
+  //         ]),
+  //     ];
+  //     pdf.addPage(pw.Page(
+  //         build: (pw.Context context) => pw.Table(
+  //             border: pw.TableBorder.all(color: PdfColors.black),
+  //             children: tableRows)));
+  //     Directory? directory = await getExternalStorageDirectory();
+  //     if (directory != null) {
+  //       String outputFile = '${directory.path}/Download/$_selectedDate.pdf';
+  //       File file = File(outputFile);
+  //       await file.create(recursive: true);
+  //       await file.writeAsBytes(await pdf.save());
+  //       Fluttertoast.showToast(msg: 'PDF downloaded');
+  //     } else {
+  //       Fluttertoast.showToast(msg: 'Failed to store');
+  //     }
+  //   } else {
+  //     Fluttertoast.showToast(msg: 'Download failed');
+  //   }
+  // }
 
   Future<void> _downloadExcel() async {
     try {
@@ -338,7 +427,26 @@ class _DailyTransactionsList extends State<DailyTransactionsList> {
                 Opacity(
                   opacity: _floattingButOpacity,
                   child: FloatingActionButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      // _downloadPDF();
+                      PdfGeneratorWidget pdfGenerator = PdfGeneratorWidget(
+                          fileName: 'Trans$_selectedDate',
+                          transactions: _transactions.map((selling) {
+                            return {
+                              'Product name': selling.productName,
+                              'unit price': selling.unitPrice.toString(),
+                              'Quantity': selling.quantity.toString(),
+                              'Total price': selling.totalPrice.toString()
+                            };
+                          }).toList(),
+                          headers: [
+                            'Product name',
+                            'Prix unitaire',
+                            'Quantité',
+                            'Prix total'
+                          ]);
+                      pdfGenerator.downloadPDF();
+                    },
                     backgroundColor: Colors.blue,
                     child: const Icon(Icons.download),
                   ),

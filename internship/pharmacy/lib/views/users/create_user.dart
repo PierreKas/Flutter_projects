@@ -261,13 +261,16 @@ class CreateUser extends StatelessWidget {
                         String fullName = _fullName.text;
                         String sellingPoint = _sellingPoint.text;
                         String role = _role.text;
+                        //String userState = 'DENIED';
 
                         User newUser = User(
-                            fullName: fullName,
-                            phoneNumber: phoneNumber,
-                            password: password,
-                            sellingPoint: sellingPoint,
-                            role: role);
+                          fullName: fullName,
+                          phoneNumber: phoneNumber,
+                          password: password,
+                          sellingPoint: sellingPoint,
+                          role: role,
+                          //  userState: userState
+                        );
                         UsersController().addUser(newUser, () {
                           Fluttertoast.showToast(msg: 'Utilisateur ajouté');
                         });

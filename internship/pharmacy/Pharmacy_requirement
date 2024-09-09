@@ -1,22 +1,41 @@
-1. Login page with Admin default login(Make it the first page after onboarding)
-2. After login I put a home page which will contain the menu  that guides to :
+1. Login page with Admin default login(Make it the first page after onboarding)===>>Done
+2. After login I put a home page which will contain the menu  that guides to : ===>>Almost done 
 	- Users	(CRUD)
 	- Product (CRUD)
 	- Selling (CRUD)
 	
-3. Only Admin can access all these menus
-4. The Manager can access product and Selling options
-5. The Seller will access only the Selling option
+3. Only Admin can access all these menus ===>>Done
+4. The Manager can access product and Selling options ===>>Done
+5. The Seller will access only the Selling option ===>>Done
+6. Management of bills 
+7. Management of users(APPROVED or DENIED,update role)
+8. Refreshment of pages
+10. Autoriser l'utilisateur de créer un compte
+11. Alerte de la date d'expérience
+12. If the phone is not connected on internet, a message toasts
 
-
-Download:
-1. Excell
-2. PDF
-
-A faire:
-Chercher les transactions par date
-Generer les productCode automatiquement
-
-
-DropdownButton
-PopupMenuButton
+=========================
+Some encountered issues:
+	- Downloaded files dissapear after a given duration
+	- Once the date is picked, any date is recognized true by the DB
+	- Remove toast messages to Product controller and view
+=============
+Ddisplay les utilisations de l'utilisateur unique
+==================================================================================================================
+// rows: _usersDetails.map((user) {
+                                          //   return DataRow(cells: [
+                                          //     DataCell(Text(user.fullName)),
+                                          //     DataCell(Text(user.phoneNumber)),
+                                          //     DataCell(Text(user.role!)),
+                                          //     DataCell(Text(user.sellingPoint)),
+                                          //     DataCell(Text(user.userState!)),
+                                          //   ]);
+                                          // }).toList(),
+==================================================
+=  DATABASE:
+=  Host: sql5.freesqldatabase.com
+=  Database name: sql5730314
+=  Database user: sql5730314
+=  Database password: PYW4dalp7b
+=  Port number: 3306
+================================

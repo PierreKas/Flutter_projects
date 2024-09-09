@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pharmacy/controllers/selling_controller.dart';
 import 'package:pharmacy/models/selling.dart';
+import 'package:pharmacy/views/selling/bill.dart';
+import 'package:pharmacy/views/selling/daily_transactions.dart';
 
 class SellingForm extends StatefulWidget {
   const SellingForm({super.key});
@@ -27,6 +29,7 @@ class _AddProductState extends State<SellingForm> {
     super.initState();
     _quantity.addListener(_calculateTotalPrice);
     _unitPrice.addListener(_calculateTotalPrice);
+    _sellerPhoneNumber.addListener(_phono);
   }
 
   @override
@@ -40,10 +43,16 @@ class _AddProductState extends State<SellingForm> {
     super.dispose();
   }
 
+  String _phono() {
+    String phone = '0900000000';
+    return phone;
+  }
+
   void _calculateTotalPrice() {
     int quantity = int.tryParse(_quantity.text) ?? 0;
     double unitPrice = double.tryParse(_unitPrice.text) ?? 0.0;
     double totalPrice = quantity * unitPrice;
+
     setState(() {
       _totalPrice.text = totalPrice.toStringAsFixed(2);
     });
@@ -87,30 +96,52 @@ class _AddProductState extends State<SellingForm> {
                               color: Color.fromARGB(255, 73, 71, 71)),
                         ),
                         const SizedBox(
-                          width: 60,
+                          width: 30,
                         ),
-                        GestureDetector(
-                            onTap: () {
-                              ListTile(
-                                trailing: PopupMenuButton(
-                                    itemBuilder: (context) => [
-                                          PopupMenuItem(
-                                            //value: ,
-                                            child: const Text(
-                                                'Daily transactions'),
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        const SellingForm()),
-                                              );
-                                            },
-                                          )
-                                        ]),
-                              );
-                            },
-                            child: const Icon(Icons.more_vert))
+                        PopupMenuButton(
+                            itemBuilder: (context) => [
+                                  PopupMenuItem(
+                                      onTap: () {
+                                        DateTime selectedDate = DateTime.now();
+                                        DateTime dateOnly = DateTime(
+                                            selectedDate.year,
+                                            selectedDate.month,
+                                            selectedDate.day);
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  DailyTransactionsList(
+                                                    sellingDate: dateOnly,
+                                                  )),
+                                        );
+                                      },
+                                      child: const Text('Ventes journalières')),
+                                  PopupMenuItem(
+                                      onTap: () async {
+                                        int? billCode;
+
+                                        billCode = await SellsController()
+                                            .getLastBillCode();
+                                        Fluttertoast.showToast(
+                                            msg: '$billCode');
+                                        print(billCode);
+                                        if (billCode != null) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => Bill(
+                                                      billCode: billCode,
+                                                    )),
+                                          );
+                                        } else {
+                                          Fluttertoast.showToast(
+                                              msg:
+                                                  'Cannot proceed because bill code is null');
+                                        }
+                                      },
+                                      child: const Text('Voir la facture')),
+                                ])
                       ],
                     ),
                     const SizedBox(
@@ -260,6 +291,7 @@ class _AddProductState extends State<SellingForm> {
                       enabled: false,
                       decoration: InputDecoration(
                         //labelText: 'Noms',
+
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(50),
                         ),
@@ -294,11 +326,12 @@ class _AddProductState extends State<SellingForm> {
                     const SizedBox(
                       height: 10,
                     ),
-                    TextFormField(
+                    TextField(
                       controller: _sellerPhoneNumber,
                       cursorColor: Colors.grey,
+                      enabled: true,
                       decoration: InputDecoration(
-                        // labelText: 'Role',
+                        // hintText: '0900000000',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(50),
                         ),

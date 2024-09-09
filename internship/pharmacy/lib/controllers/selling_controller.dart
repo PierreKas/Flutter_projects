@@ -30,86 +30,66 @@ class SellsController {
       Fluttertoast.showToast(msg: 'Erreur lors de l\'ajout du produit');
     }
   }
+//  Future<void> setBillCode() async {
+//     final conn = await DatabaseHelper.getConnection();
+//     if (conn == null) {
+//       return;
+//     }
+//     int newDefaultBillCode = randonNum();
+//     String alterSql =
+//         "ALTER TABLE selling ALTER COLUMN bill_code SET DEFAULT newDefaultBillCode";
+//     await conn.execute(alterSql);
+//     await conn.close();
+//   }
 
-  // Future<void> deleteSelling(String SellingCode, Function callback) async {
-  //   try {
-  //     DatabaseHelper dbHelper = DatabaseHelper();
-  //     bool isDeleted = await dbHelper.deleteSellingToDB(SellingCode);
-  //     if (isDeleted) {
-  //       SellingsList
-  //           .removeWhere((Selling) => Selling.SellingCode == SellingCode);
-  //       callback();
-  //     } else {
-  //       Fluttertoast.showToast(
-  //           msg: 'Aucun produit trouvé avec le code: $SellingCode');
-  //     }
-  //   } catch (e) {
-  //     Fluttertoast.showToast(msg: 'Erreur lors de la suppression du produit');
-  //   }
-  // }
-
-  // Future<void> updateSelling(Selling Selling, Function callback) async {
-  //   if (Selling.SellingCode.isEmpty ||
-  //       Selling.SellingName.isEmpty ||
-  //       Selling.purchasePrice <= 0 ||
-  //       Selling.quantity <= 0 ||
-  //       Selling.expiryDate == null) {
-  //     Fluttertoast.showToast(msg: 'Veuillez remplir tous les champs requis');
-  //     return;
-  //   }
-  //   try {
-  //     DatabaseHelper dbHelper = DatabaseHelper();
-  //     await dbHelper.updateSellingInDB(Selling);
-  //     int index =
-  //         SellingsList.indexWhere((p) => p.SellingCode == Selling.SellingCode);
-  //     if (index != -1) {
-  //       SellingsList[index] = Selling;
-  //     }
-  //     callback();
-  //     getSellings(callback);
-  //   } catch (e) {
-  //     Fluttertoast.showToast(msg: 'Erreur lors de la mise à jour du produit');
-  //   }
-  // }
-
-  Future<void> getTransactions(Function callback) async {
+  Future<void> setBillCode() async {
     try {
       SellingDatabaseHelper dbHelper = SellingDatabaseHelper();
-      List<Map<String, dynamic>> TransactionsData =
-          await dbHelper.getTransactionsToDB();
-
-      // usersList.clear();
-      print('Raw Selling data: $TransactionsData');
-
-      transactionsList = TransactionsData.map((TransactionData) {
-        return Selling(
-          productCode: TransactionData['product_code'] as String,
-          sellerPhoneNumber: TransactionData['seller_phone_number'] as String,
-          unitPrice: (TransactionData['unit_price'] is num)
-              ? (TransactionData['unit_price'] as num).toDouble()
-              : double.tryParse(TransactionData['unit_price'] as String) ?? 0.0,
-          quantity: (TransactionData['quantity'] is int)
-              ? TransactionData['quantity'] as int
-              : int.tryParse(TransactionData['quantity'] as String) ?? 0,
-          sellingDate: TransactionData['selling_date'] != null
-              ? DateTime.parse(TransactionData['selling_date'] as String)
-              : null,
-          totalPrice: (TransactionData['total_price'] is num)
-              ? (TransactionData['total_price'] as num).toDouble()
-              : double.tryParse(TransactionData['total_price'] as String) ??
-                  0.0,
-        );
-      }).toList();
-
-      print('Mapped Transactions: $transactionsList');
-
-      callback();
-      Fluttertoast.showToast(msg: 'Transactions récupérées avec succès');
+      await dbHelper.setBillCodeInDB();
     } catch (e) {
-      print('Error: $e');
-      Fluttertoast.showToast(
-          msg: 'Erreur lors de la récupération des transactions');
+      Fluttertoast.showToast(msg: 'Bill code didn\'t');
     }
+  }
+
+  // Future<String?> getLastBillCodeToDB() async {
+  //   final conn = await DatabaseHelper.getConnection();
+  //   if (conn == null) {
+  //     return null;
+  //   }
+
+  //   const sql = '''
+  //   SELECT bill_code FROM selling
+  //   WHERE transaction_id = (SELECT MAX(transaction_id) FROM selling)
+  // ''';
+
+  //   try {
+  //     final results = await conn.execute(sql);
+  //     if (results.isNotEmpty) {
+  //       final lastBillCode = results.rows.first.assoc()['bill_code'];
+  //       print('Last bill_code retrieved successfully $lastBillCode');
+  //       return lastBillCode;
+  //     } else {
+  //       print('No transactions found.');
+  //       return null;
+  //     }
+  //   } catch (e) {
+  //     print('Error during SELECT operation: $e');
+  //     return null;
+  //   } finally {
+  //     await conn.close();
+  //   }
+  // }
+
+  Future<int?> getLastBillCode() async {
+    int? lastBillCode;
+    try {
+      SellingDatabaseHelper dbHelper = SellingDatabaseHelper();
+      lastBillCode = await dbHelper.getLastBillCodeToDB();
+      print(lastBillCode);
+    } catch (e) {
+      Fluttertoast.showToast(msg: 'Nothing was returned');
+    }
+    return lastBillCode;
   }
 
   Future<void> getSellingInfoByDate(
@@ -144,6 +124,7 @@ class SellsController {
                 ? (transactionData['total_price'] as num).toDouble()
                 : double.tryParse(transactionData['total_price'] as String) ??
                     0.0,
+            productName: transactionData['product_name'] as String,
           );
         }).toList();
 
@@ -153,6 +134,56 @@ class SellsController {
         Fluttertoast.showToast(
             msg:
                 'No transactions found for the date: ${DateTime(sellingDate.year, sellingDate.month, sellingDate.day)}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      Fluttertoast.showToast(
+          msg: 'Erreur lors de la récupération des transactions');
+    }
+  }
+
+  Future<void> getTransactionInfoByBillCode(
+      int? billCode, Function(List<Selling>) callback) async {
+    try {
+      SellingDatabaseHelper dbHelper = SellingDatabaseHelper();
+      // billCode ??= await dbHelper.getLastBillCodeToDB();
+      // print(billCode);
+      List<Map<String, dynamic>>? transactionsData =
+          await dbHelper.getTransactionInfoFromDbByBillCode(billCode);
+      print(transactionsData);
+      // ignore: unnecessary_null_comparison
+      if (transactionsData != null && transactionsData.isNotEmpty) {
+        List<Selling> transactions = transactionsData.map((transactionData) {
+          print('Transac data for this bill code: $transactionData');
+          return Selling(
+            // billCode: (transactionData['bill_code'] is int)
+            //     ? transactionData['bill_code'] as int
+            //     : int.tryParse(transactionData['bill_code'] as String) ?? 0,
+            productCode: transactionData['product_code'] as String,
+            sellerPhoneNumber: transactionData['seller_phone_number'] as String,
+            unitPrice: (transactionData['unit_price'] is num)
+                ? (transactionData['unit_price'] as num).toDouble()
+                : double.tryParse(transactionData['unit_price'] as String) ??
+                    0.0,
+            quantity: (transactionData['quantity'] is int)
+                ? transactionData['quantity'] as int
+                : int.tryParse(transactionData['quantity'] as String) ?? 0,
+            sellingDate: transactionData['selling_date'] != null
+                ? DateTime.parse(transactionData['selling_date'] as String)
+                : null,
+            totalPrice: (transactionData['total_price'] is num)
+                ? (transactionData['total_price'] as num).toDouble()
+                : double.tryParse(transactionData['total_price'] as String) ??
+                    0.0,
+            productName: transactionData['product_name'] as String,
+          );
+        }).toList();
+
+        callback(transactions);
+      } else {
+        Fluttertoast.showToast(
+            msg: 'No transactions found for the bill code: $billCode');
+        print('No transactions found for the bill code: $billCode');
       }
     } catch (e) {
       print('Error: $e');

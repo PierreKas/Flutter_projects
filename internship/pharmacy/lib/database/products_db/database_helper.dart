@@ -6,7 +6,9 @@ class ProductDatabaseHelper {
   Future<List<Map<String, dynamic>>> getProductsToDB() async {
     final conn = await DatabaseHelper.getConnection();
     const sql = 'SELECT * FROM products';
-
+    if (conn == null) {
+      return [];
+    }
     try {
       final results = await conn.execute(sql);
       final products = results.rows.map((row) => row.assoc()).toList();
@@ -23,7 +25,9 @@ class ProductDatabaseHelper {
 
   Future<Map<String, dynamic>?> getProductInfoToDB(String productCode) async {
     final conn = await DatabaseHelper.getConnection();
-
+    if (conn == null) {
+      return null;
+    }
     const sql = 'SELECT * FROM products WHERE product_code= :productCode';
 
     try {
@@ -49,7 +53,9 @@ class ProductDatabaseHelper {
 
   Future<bool> deleteProductToDB(String productCode) async {
     final conn = await DatabaseHelper.getConnection();
-
+    if (conn == null) {
+      return false;
+    }
     const sql = 'DELETE FROM products WHERE product_code= :productCode';
 
     try {
@@ -75,6 +81,9 @@ class ProductDatabaseHelper {
 
   Future<void> addProductToDB(Product product) async {
     final conn = await DatabaseHelper.getConnection();
+    if (conn == null) {
+      return;
+    }
     final sql = '''
     INSERT INTO products (product_code, product_name, purchase_price, quantity, expiry_date) 
     VALUES (
@@ -99,7 +108,9 @@ class ProductDatabaseHelper {
 
   Future<Map<String, dynamic>?> updateProductInDB(Product product) async {
     final conn = await DatabaseHelper.getConnection();
-
+    if (conn == null) {
+      return null;
+    }
     final sql = '''
   UPDATE products 
   SET 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharmacy/controllers/users_controller.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController _phoneNumber = TextEditingController();
@@ -113,6 +114,7 @@ class LoginPage extends StatelessWidget {
                           TextField(
                             controller: _password,
                             cursorColor: Colors.grey,
+                            obscureText: true,
                             decoration: InputDecoration(
                               //labelText: 'Mot de passe',
                               border: OutlineInputBorder(
@@ -139,7 +141,11 @@ class LoginPage extends StatelessWidget {
                             height: 16,
                           ),
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              UsersController().login(
+                                  _phoneNumber.text, _password.text, context);
+                              _password.clear();
+                            },
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue),
                             child: const Text(

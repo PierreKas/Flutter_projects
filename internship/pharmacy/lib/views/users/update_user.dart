@@ -1,17 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:pharmacy/controllers/users_controller.dart';
 import 'package:pharmacy/models/users.dart';
+import 'package:pharmacy/views/users/users_list.dart';
 
-class UpdateUser extends StatelessWidget {
+// ignore: must_be_immutable
+class UpdateUser extends StatefulWidget {
+  String userPhoneNumber;
+  UpdateUser({super.key, required this.userPhoneNumber});
+
+  @override
+  State<UpdateUser> createState() => _UpdateUserState();
+}
+
+class _UpdateUserState extends State<UpdateUser> {
   final TextEditingController _fullName = TextEditingController();
-  final TextEditingController _phoneNumber = TextEditingController();
+
+  TextEditingController _phoneNumber = TextEditingController();
+
   //final TextEditingController _role = TextEditingController();
   final TextEditingController _sellingPoint = TextEditingController();
-  final TextEditingController _password = TextEditingController();
-  final TextEditingController _userState = TextEditingController();
-  String? _selectedUserState;
 
-  UpdateUser({super.key});
+  final TextEditingController _password = TextEditingController();
+
+  //final TextEditingController _userState = TextEditingController();
+  final TextEditingController _role = TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _phoneNumber = TextEditingController(text: widget.userPhoneNumber);
+    _fetchUserData();
+  }
+
+  void _fetchUserData() async {
+    await UsersController().getUserInfo(widget.userPhoneNumber, (User user) {
+      setState(() {
+        _fullName.text = user.fullName;
+        // _password.text = user.password;
+        _sellingPoint.text = user.sellingPoint;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +103,7 @@ class UpdateUser extends StatelessWidget {
                     TextField(
                       controller: _phoneNumber,
                       cursorColor: Colors.grey,
+                      enabled: false,
                       decoration: InputDecoration(
                         // labelText: 'Tél',
                         // labelStyle: const TextStyle(
@@ -93,45 +124,6 @@ class UpdateUser extends StatelessWidget {
                           color: Colors.blue,
                         ),
                         //floatingLabelBehavior: FloatingLabelBehavior.never
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 220.0),
-                      child: Text(
-                        'Mot de passe',
-                        textAlign: TextAlign.start,
-                        style: TextStyle(
-                            color: Colors.blue, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    TextField(
-                      controller: _password,
-                      cursorColor: Colors.grey,
-                      decoration: InputDecoration(
-                        //labelText: 'Mot de passe',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(60.0),
-                          borderSide: const BorderSide(color: Colors.blue),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(80.0),
-                          borderSide: const BorderSide(
-                            color: Colors.grey,
-                          ),
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.lock,
-                          color: Colors.blue,
-                        ),
                       ),
                     ),
                     const SizedBox(
@@ -177,9 +169,9 @@ class UpdateUser extends StatelessWidget {
                       height: 16,
                     ),
                     const Padding(
-                      padding: EdgeInsets.only(right: 200.0),
+                      padding: EdgeInsets.only(right: 220.0),
                       child: Text(
-                        'Point de vente',
+                        'Mot de passe',
                         textAlign: TextAlign.start,
                         style: TextStyle(
                             color: Colors.blue, fontWeight: FontWeight.bold),
@@ -189,10 +181,12 @@ class UpdateUser extends StatelessWidget {
                       height: 10,
                     ),
                     TextField(
-                      controller: _sellingPoint,
+                      controller: _password,
                       cursorColor: Colors.grey,
+                      obscureText: true,
                       decoration: InputDecoration(
-                        // labelText: 'Point de vente',
+                        hintText: 'Pas moins de 5 digits',
+                        //labelText: 'Mot de passe',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(50),
                         ),
@@ -207,62 +201,8 @@ class UpdateUser extends StatelessWidget {
                           ),
                         ),
                         prefixIcon: const Icon(
-                          Icons.store, // Adjust icon as needed
+                          Icons.lock,
                           color: Colors.blue,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 200.0),
-                      child: Text(
-                        'Etat d\'utilisateur',
-                        textAlign: TextAlign.start,
-                        style: TextStyle(
-                            color: Colors.blue, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    DropdownButtonFormField<String>(
-                      value: _selectedUserState,
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'Allowed',
-                          child: Text(
-                            'Allowed',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Denied',
-                          child: Text(
-                            'Denied',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                      ],
-                      onChanged: (String? newValue) {
-                        // setState(() {
-                        //   _selectedUserState = newValue;
-                        // });
-                      },
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(60.0),
-                          borderSide: const BorderSide(color: Colors.blue),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(80.0),
-                          borderSide: const BorderSide(
-                            color: Colors.grey,
-                          ),
                         ),
                       ),
                     ),
@@ -275,23 +215,28 @@ class UpdateUser extends StatelessWidget {
                         String password = _password.text;
                         String fullName = _fullName.text;
                         String sellingPoint = _sellingPoint.text;
-                        //String role = _role.text;
+                        String role = _role.text;
+                        // String userState = _userState.text;
 
                         User updatedUser = User(
                           fullName: fullName,
                           phoneNumber: phoneNumber,
                           password: password,
                           sellingPoint: sellingPoint,
-                          //  role: role
+                          role: role,
+                          //userState: userState,
                         );
-                        // UsersController().addUser(newUser, () {
-                        //   Fluttertoast.showToast(msg: 'Données modifiées');
-                        // });
+
+                        UsersController().updateUserInfo(updatedUser, () {});
                         _fullName.clear();
                         _password.clear();
                         _phoneNumber.clear();
-                        //_role.clear();
+                        _role.clear();
                         _sellingPoint.clear();
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const UsersList()));
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue),
