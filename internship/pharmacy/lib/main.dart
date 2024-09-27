@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pharmacy/pages/Introductionpages/onboardingscreen.dart';
-import 'package:pharmacy/pages/home.dart';
 import 'package:pharmacy/services/notificationsService.dart';
 
 void main() async {
