@@ -1,12 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:pharmacy/controllers/products_controller.dart';
 import 'package:pharmacy/controllers/users_controller.dart';
+import 'package:pharmacy/models/products.dart';
 import 'package:pharmacy/pages/login_page.dart';
+import 'package:pharmacy/views/clients/clients_list.dart';
 import 'package:pharmacy/views/products/products_list.dart';
 import 'package:pharmacy/views/selling/selling_form.dart';
 import 'package:pharmacy/views/users/users_list.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _fetchProducts();
+  }
+
+  void _fetchProducts() async {
+    await ProductsController().getProducts(() {
+      setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,38 +80,33 @@ class Home extends StatelessWidget {
             ListTile(
               title: const Text('Ventes'),
               onTap: () {
-/**
- * 
- *  DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        firstDate: DateTime(2024),
-                        lastDate: DateTime(2025),
-                        initialDate: DateTime(2024));
-                    if (pickedDate != null) {
-                      setState(() {
-                        _selectedDate = pickedDate;
-                        _searchedDate.text =
-                            _selectedDate!.toIso8601String().split('T').first;
-                      });
-                    }
- */
-                // setState(() {
-                //         _selectedDate = pickedDate;
-                //         _searchedDate.text =
-                //             _selectedDate!.toIso8601String().split('T').first;
-                //       });
+                int userId = UsersController.userId;
+
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SellingForm()),
+                  MaterialPageRoute(
+                      builder: (context) => SellingForm(
+                            userId: userId,
+                          )),
+                );
+              },
+            ),
+            ListTile(
+              title: const Text('Clients'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ClientsList()),
                 );
               },
             ),
             ListTile(
               title: const Text('Logout'),
               onTap: () {
-                Navigator.push(
+                Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                  (route) => false,
                 );
               },
             ),
@@ -117,606 +133,85 @@ class Home extends StatelessWidget {
             padding: const EdgeInsets.only(top: 10),
             child: Column(
               children: [
-                const Text(
-                  'Nos produits disponibles',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 30,
-                      color: Color.fromARGB(255, 71, 69, 69)),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, right: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Nos produits disponibles',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 25,
+                            color: Color.fromARGB(255, 71, 69, 69)),
+                      ),
+                      GestureDetector(
+                          onTap: () {
+                            _fetchProducts();
+                          },
+                          child: const Icon(Icons.refresh))
+                    ],
+                  ),
                 ),
                 Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Container(
-                              width: 110,
-                              height: 150,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                  child: GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                              childAspectRatio: 0.75),
+                      itemCount: ProductsController.productsList.length,
+                      itemBuilder: (context, index) {
+                        Product product =
+                            ProductsController.productsList[index];
+                        return Container(
+                          width: 110,
+                          height: 150,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(15)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Center(
+                                  child: Image.asset(
+                                    'assets/professional-medical-doctor-hand-giving-medicine-photo.jpg',
+                                    width: 90,
+                                    height: 90,
+                                  ),
+                                ),
+                                Text(
+                                  product.productName,
+                                  style: const TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Center(
-                                      child: Image.asset(
-                                        'assets/dawa-1.jpg',
-                                        width: 90,
-                                        height: 90,
-                                      ),
-                                    ),
                                     const Text(
-                                      'Papaverine',
+                                      'Prix:',
                                       style: TextStyle(
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.normal),
+                                    ),
+                                    Text(
+                                      product.purchasePrice.toString(),
+                                      style: const TextStyle(
                                           color: Colors.black,
                                           fontWeight: FontWeight.bold),
-                                    ),
-                                    const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Prix:',
-                                          style: TextStyle(
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.normal),
-                                        ),
-                                        Text(
-                                          '000 Fc',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
                                     )
                                   ],
-                                ),
-                              ),
+                                )
+                              ],
                             ),
-                            Container(
-                              width: 110,
-                              height: 150,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Center(
-                                      child: Image.asset(
-                                        'assets/dawa.jpg',
-                                        width: 90,
-                                        height: 90,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'Paracetamol',
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Prix:',
-                                          style: TextStyle(
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.normal),
-                                        ),
-                                        Text(
-                                          '000 Fc',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: 110,
-                              height: 150,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Center(
-                                      child: Image.asset(
-                                        'assets/dawa2.jpg',
-                                        width: 90,
-                                        height: 90,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'Artequick',
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Prix:',
-                                          style: TextStyle(
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.normal),
-                                        ),
-                                        Text(
-                                          '000 Fc',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        ////////////////
-                        ///
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Container(
-                              width: 110,
-                              height: 150,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Center(
-                                      child: Image.asset(
-                                        'assets/dawa-1.jpg',
-                                        width: 90,
-                                        height: 90,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'Papaverine',
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Prix:',
-                                          style: TextStyle(
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.normal),
-                                        ),
-                                        Text(
-                                          '000 Fc',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: 110,
-                              height: 150,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Center(
-                                      child: Image.asset(
-                                        'assets/dawa.jpg',
-                                        width: 90,
-                                        height: 90,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'Paracetamol',
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Prix:',
-                                          style: TextStyle(
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.normal),
-                                        ),
-                                        Text(
-                                          '000 Fc',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: 110,
-                              height: 150,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Center(
-                                      child: Image.asset(
-                                        'assets/dawa2.jpg',
-                                        width: 90,
-                                        height: 90,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'Artequick',
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Prix:',
-                                          style: TextStyle(
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.normal),
-                                        ),
-                                        Text(
-                                          '000 Fc',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        /////////////////////////////
-                        ///
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Container(
-                              width: 110,
-                              height: 150,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Center(
-                                      child: Image.asset(
-                                        'assets/dawa-1.jpg',
-                                        width: 90,
-                                        height: 90,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'Papaverine',
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Prix:',
-                                          style: TextStyle(
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.normal),
-                                        ),
-                                        Text(
-                                          '000 Fc',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: 110,
-                              height: 150,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Center(
-                                      child: Image.asset(
-                                        'assets/dawa.jpg',
-                                        width: 90,
-                                        height: 90,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'Paracetamol',
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Prix:',
-                                          style: TextStyle(
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.normal),
-                                        ),
-                                        Text(
-                                          '000 Fc',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: 110,
-                              height: 150,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Center(
-                                      child: Image.asset(
-                                        'assets/dawa2.jpg',
-                                        width: 90,
-                                        height: 90,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'Artequick',
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Prix:',
-                                          style: TextStyle(
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.normal),
-                                        ),
-                                        Text(
-                                          '000 Fc',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        ///////////////////////////////////
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Container(
-                              width: 110,
-                              height: 150,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Center(
-                                      child: Image.asset(
-                                        'assets/dawa-1.jpg',
-                                        width: 90,
-                                        height: 90,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'Papaverine',
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Prix:',
-                                          style: TextStyle(
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.normal),
-                                        ),
-                                        Text(
-                                          '000 Fc',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: 110,
-                              height: 150,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Center(
-                                      child: Image.asset(
-                                        'assets/dawa.jpg',
-                                        width: 90,
-                                        height: 90,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'Paracetamol',
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Prix:',
-                                          style: TextStyle(
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.normal),
-                                        ),
-                                        Text(
-                                          '000 Fc',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: 110,
-                              height: 150,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Center(
-                                      child: Image.asset(
-                                        'assets/dawa2.jpg',
-                                        width: 90,
-                                        height: 90,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'Artequick',
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Prix:',
-                                          style: TextStyle(
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.normal),
-                                        ),
-                                        Text(
-                                          '000 Fc',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                          ),
+                        );
+                      }),
                 )
               ],
             ),

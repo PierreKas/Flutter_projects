@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:pharmacy/controllers/users_controller.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController _phoneNumber = TextEditingController();
+
   final TextEditingController _password = TextEditingController();
-  LoginPage({super.key});
+
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -142,18 +151,35 @@ class LoginPage extends StatelessWidget {
                           ),
                           ElevatedButton(
                             onPressed: () {
+                              setState(() {
+                                isLoading = true;
+                              });
+                              Future.delayed(const Duration(seconds: 5), () {
+                                setState(() {
+                                  isLoading = false;
+                                });
+                              });
                               UsersController().login(
                                   _phoneNumber.text, _password.text, context);
                               _password.clear();
                             },
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue),
-                            child: const Text(
-                              'SIGN IN',
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 238, 237, 237),
-                              ),
-                            ),
+                            child: isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text(
+                                    'SIGN IN',
+                                    style: TextStyle(
+                                      color: Color.fromARGB(255, 238, 237, 237),
+                                    ),
+                                  ),
                           ),
                         ],
                       ),

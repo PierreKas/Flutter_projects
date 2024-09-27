@@ -1,25 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:pharmacy/controllers/users_controller.dart';
-import 'package:pharmacy/models/users.dart';
+import 'package:pharmacy/controllers/clients_controller.dart';
+import 'package:pharmacy/models/client.dart';
+import 'package:pharmacy/views/clients/clients_list.dart';
 
-class CreateUser extends StatefulWidget {
-  const CreateUser({super.key});
+class CreateClient extends StatefulWidget {
+  const CreateClient({super.key});
 
   @override
-  State<CreateUser> createState() => _CreateUserState();
+  State<CreateClient> createState() => _CreateClientState();
 }
 
-class _CreateUserState extends State<CreateUser> {
+class _CreateClientState extends State<CreateClient> {
   final TextEditingController _fullName = TextEditingController();
 
   final TextEditingController _phoneNumber = TextEditingController();
 
-  final TextEditingController _role = TextEditingController();
-
-  final TextEditingController _sellingPoint = TextEditingController();
+  final TextEditingController _address = TextEditingController();
 
   final TextEditingController _password = TextEditingController();
   bool isLoading = false;
+  @override
+  void dispose() {
+    _fullName.dispose();
+    _phoneNumber.dispose();
+    _address.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,10 +89,6 @@ class _CreateUserState extends State<CreateUser> {
                       controller: _phoneNumber,
                       cursorColor: Colors.grey,
                       decoration: InputDecoration(
-                        // labelText: 'Tél',
-                        // labelStyle: const TextStyle(
-                        //   color: Color.fromARGB(255, 177, 223, 179),
-                        // ),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(50)),
                         focusedBorder: OutlineInputBorder(
@@ -99,7 +103,6 @@ class _CreateUserState extends State<CreateUser> {
                           Icons.phone_android_rounded,
                           color: Colors.blue,
                         ),
-                        //floatingLabelBehavior: FloatingLabelBehavior.never
                       ),
                     ),
                     const SizedBox(
@@ -120,8 +123,8 @@ class _CreateUserState extends State<CreateUser> {
                     TextField(
                       controller: _password,
                       cursorColor: Colors.grey,
+                      obscureText: true,
                       decoration: InputDecoration(
-                        //labelText: 'Mot de passe',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(50),
                         ),
@@ -186,7 +189,7 @@ class _CreateUserState extends State<CreateUser> {
                     const Padding(
                       padding: EdgeInsets.only(right: 200.0),
                       child: Text(
-                        'Point de vente',
+                        'Adrress',
                         textAlign: TextAlign.start,
                         style: TextStyle(
                             color: Colors.blue, fontWeight: FontWeight.bold),
@@ -196,7 +199,7 @@ class _CreateUserState extends State<CreateUser> {
                       height: 10,
                     ),
                     TextField(
-                      controller: _sellingPoint,
+                      controller: _address,
                       cursorColor: Colors.grey,
                       decoration: InputDecoration(
                         // labelText: 'Point de vente',
@@ -222,62 +225,18 @@ class _CreateUserState extends State<CreateUser> {
                     const SizedBox(
                       height: 16,
                     ),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 260.0),
-                      child: Text(
-                        'Role',
-                        textAlign: TextAlign.start,
-                        style: TextStyle(
-                            color: Colors.blue, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    TextField(
-                      controller: _role,
-                      cursorColor: Colors.grey,
-                      decoration: InputDecoration(
-                        // labelText: 'Role',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(60.0),
-                          borderSide: const BorderSide(color: Colors.blue),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(80.0),
-                          borderSide: const BorderSide(
-                            color: Colors.grey,
-                          ),
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.work, // Adjust icon as needed
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
                     ElevatedButton(
                       onPressed: () {
                         String phoneNumber = _phoneNumber.text;
                         String password = _password.text;
                         String fullName = _fullName.text;
-                        String sellingPoint = _sellingPoint.text;
-                        String role = _role.text;
-                        //String userState = 'DENIED';
+                        String address = _address.text;
 
-                        User newUser = User(
-                          fullName: fullName,
-                          phoneNumber: phoneNumber,
-                          password: password,
-                          sellingPoint: sellingPoint,
-                          role: role,
-                          //  userState: userState
-                        );
+                        Client newClient = Client(
+                            fullName: fullName,
+                            phoneNumber: phoneNumber,
+                            password: password,
+                            address: address);
                         setState(() {
                           isLoading = true;
                         });
@@ -286,12 +245,16 @@ class _CreateUserState extends State<CreateUser> {
                             isLoading = false;
                           });
                         });
-                        UsersController().addUser(newUser, () {});
+                        ClientsController().addClient(newClient, () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const ClientsList()));
+                        });
                         _fullName.clear();
                         _password.clear();
                         _phoneNumber.clear();
-                        _role.clear();
-                        _sellingPoint.clear();
+                        _address.clear();
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue),

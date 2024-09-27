@@ -21,11 +21,15 @@ class _UpdateProductState extends State<UpdateProduct> {
   final TextEditingController _quantity = TextEditingController();
 
   final TextEditingController _expiryDate = TextEditingController();
+  bool isLoading = false;
 
   DateTime? _selectedDate;
   @override
   void dispose() {
-    // TODO: implement dispose
+    _productName.dispose();
+    _purchasePrice.dispose();
+    _quantity.dispose();
+    _expiryDate.dispose();
     _productCodeController.dispose();
     super.dispose();
   }
@@ -316,6 +320,14 @@ class _UpdateProductState extends State<UpdateProduct> {
                             purchasePrice: purchasePrice,
                             expiryDate: expiryDate,
                             quantity: quantity);
+                        setState(() {
+                          isLoading = true;
+                        });
+                        Future.delayed(const Duration(seconds: 5), () {
+                          setState(() {
+                            isLoading = false;
+                          });
+                        });
                         ProductsController()
                             .updateProduct(updatedProduct, () {});
                         _expiryDate.clear();
@@ -326,12 +338,21 @@ class _UpdateProductState extends State<UpdateProduct> {
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue),
-                      child: const Text(
-                        'Modifier',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 238, 237, 237),
-                        ),
-                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              'Modifier',
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 238, 237, 237),
+                              ),
+                            ),
                     )
                   ],
                 ),

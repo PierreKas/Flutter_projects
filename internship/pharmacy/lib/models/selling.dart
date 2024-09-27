@@ -5,9 +5,10 @@ class Selling {
   int? quantity;
   DateTime? sellingDate;
   double? totalPrice;
-  String sellerPhoneNumber;
+  int? userId;
   int? transactionId;
   String? productName;
+  int? clientId;
 
   Selling(
       {this.billCode,
@@ -16,9 +17,10 @@ class Selling {
       this.quantity,
       this.sellingDate,
       this.totalPrice,
-      required this.sellerPhoneNumber,
+      this.userId,
       this.transactionId,
-      this.productName});
+      this.productName,
+      this.clientId});
 
   factory Selling.fromJson(Map<String, dynamic> json) {
     return Selling(
@@ -30,9 +32,10 @@ class Selling {
           ? DateTime.parse(json['selling_date'])
           : null,
       totalPrice: json['total_price'],
-      sellerPhoneNumber: json['seller_phone_number'],
+      userId: json['user_id'],
       transactionId: json['TransactionId'],
       productName: json['product_name'],
+      clientId: json['client_id'],
     );
   }
 
@@ -44,9 +47,10 @@ class Selling {
       'quantity': quantity,
       'selling_date': sellingDate?.toIso8601String(),
       'total_price': totalPrice,
-      'seller_phone_number': sellerPhoneNumber,
+      'user_id': userId,
       'TransactionId': transactionId,
       'product_name': productName,
+      'client_id': clientId,
     };
   }
 }

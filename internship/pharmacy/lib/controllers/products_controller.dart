@@ -2,9 +2,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:pharmacy/database/products_db/database_helper.dart';
 import 'package:pharmacy/models/products.dart';
+import 'package:pharmacy/services/notificationsService.dart';
 
 class ProductsController {
   static List<Product> productsList = [];
+  DateTime? expiryDate;
+  DateTime currentDate = DateTime.now();
+  String expiredProduct = '';
 
   Future<void> addProduct(Product product, Function callback) async {
     if (product.productCode.isEmpty || product.productName.isEmpty) {
@@ -17,7 +21,7 @@ class ProductsController {
       await dbHelper.addProductToDB(product);
       productsList.add(product);
       callback();
-      getProducts(callback);
+      //getProducts(callback);
     } catch (e) {
       Fluttertoast.showToast(msg: 'Erreur lors de l\'ajout du produit');
     }
@@ -58,7 +62,7 @@ class ProductsController {
         productsList[index] = product;
       }
       callback();
-      getProducts(callback);
+      await getProducts(callback);
     } catch (e) {
       Fluttertoast.showToast(msg: 'Erreur lors de la mise à jour du produit');
     }
@@ -72,8 +76,24 @@ class ProductsController {
 
       // usersList.clear();
       print('Raw product data: $productsData');
-
+      DateTime twoMonthsFromNow =
+          DateTime(currentDate.year, currentDate.month + 2, currentDate.day);
+      print(twoMonthsFromNow);
       productsList = productsData.map((productData) {
+        expiryDate = productData['expiry_date'] != null
+            ? DateTime.parse(productData['expiry_date'] as String)
+            : null;
+        expiredProduct = productData['product_name'] as String;
+        if (expiryDate!.isBefore(twoMonthsFromNow)) {
+          final NotificationsService notificationsService =
+              NotificationsService();
+          notificationsService.showNotification(
+            'La date d\'expiration approche',
+            '''
+Vérifie les dates d'expiration des médicaments du produit $expiredProduct
+''',
+          );
+        }
         return Product(
           productCode: productData['product_code'] as String,
           productName: productData['product_name'] as String,
@@ -91,7 +111,6 @@ class ProductsController {
       print('Mapped products: $productsList');
 
       callback();
-      Fluttertoast.showToast(msg: 'Produits récupérés avec succès');
     } catch (e) {
       print('Error: $e');
       Fluttertoast.showToast(

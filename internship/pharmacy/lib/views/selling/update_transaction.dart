@@ -1,25 +1,71 @@
 import 'package:flutter/material.dart';
-import 'package:pharmacy/controllers/users_controller.dart';
-import 'package:pharmacy/models/users.dart';
+import 'package:pharmacy/controllers/selling_controller.dart';
+import 'package:pharmacy/models/selling.dart';
+import 'package:pharmacy/views/selling/bill.dart';
 
-class CreateUser extends StatefulWidget {
-  const CreateUser({super.key});
+// ignore: must_be_immutable
+class UpdateTransaction extends StatefulWidget {
+  int? transactionId;
+  UpdateTransaction({super.key, required this.transactionId});
 
   @override
-  State<CreateUser> createState() => _CreateUserState();
+  State<UpdateTransaction> createState() => _UpdateTransactionState();
 }
 
-class _CreateUserState extends State<CreateUser> {
-  final TextEditingController _fullName = TextEditingController();
+class _UpdateTransactionState extends State<UpdateTransaction> {
+  late TextEditingController _transactionIdController;
 
-  final TextEditingController _phoneNumber = TextEditingController();
+  final TextEditingController _productName = TextEditingController();
 
-  final TextEditingController _role = TextEditingController();
+  final TextEditingController _unitPrice = TextEditingController();
 
-  final TextEditingController _sellingPoint = TextEditingController();
+  final TextEditingController _quantity = TextEditingController();
 
-  final TextEditingController _password = TextEditingController();
   bool isLoading = false;
+  Selling _transaction = Selling();
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _transactionIdController.dispose();
+    _productName.dispose();
+    _unitPrice.dispose();
+    _quantity.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _transactionIdController =
+        TextEditingController(text: widget.transactionId.toString());
+    // _productName = TextEditingController(text: selling.productName);
+    // _unitPrice = TextEditingController(text: selling.unitPrice.toString());
+    // _quantity = TextEditingController(text: selling.quantity.toString());
+    initiateTextFields();
+  }
+
+  void initiateTextFields() async {
+    // Selling updatedTransaction = Selling(
+    //     transactionId: widget.transactionId ?? 0,
+    //     productName: _productName.text,
+    //     unitPrice: double.tryParse(_unitPrice.text) ?? 0.0,
+    //     quantity: int.tryParse(_quantity.text) ?? 0);
+
+    await SellsController()
+        .getTransactionInfoByTransactionId(widget.transactionId, (transaction) {
+      setState(() {
+        _transaction = transaction;
+        _productName.text = _transaction.productName ?? '';
+        _quantity.text = _transaction.quantity.toString();
+        _unitPrice.text = _transaction.unitPrice.toString();
+
+        isLoading = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,7 +104,7 @@ class _CreateUserState extends State<CreateUser> {
                       height: 20,
                     ),
                     const Text(
-                      'Complétez ici les données du nouveau utilisateur',
+                      'Modifier les informations de la transaction',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey),
                     ),
@@ -66,9 +112,9 @@ class _CreateUserState extends State<CreateUser> {
                       height: 20,
                     ),
                     const Padding(
-                      padding: EdgeInsets.only(right: 240.0),
+                      padding: EdgeInsets.only(right: 200.0),
                       child: Text(
-                        'Téléphone',
+                        'Code du produit',
                         textAlign: TextAlign.start,
                         style: TextStyle(
                             color: Colors.blue, fontWeight: FontWeight.bold),
@@ -78,13 +124,10 @@ class _CreateUserState extends State<CreateUser> {
                       height: 10,
                     ),
                     TextField(
-                      controller: _phoneNumber,
+                      controller: _transactionIdController,
                       cursorColor: Colors.grey,
+                      enabled: false,
                       decoration: InputDecoration(
-                        // labelText: 'Tél',
-                        // labelStyle: const TextStyle(
-                        //   color: Color.fromARGB(255, 177, 223, 179),
-                        // ),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(50)),
                         focusedBorder: OutlineInputBorder(
@@ -96,86 +139,7 @@ class _CreateUserState extends State<CreateUser> {
                           borderSide: const BorderSide(color: Colors.grey),
                         ),
                         prefixIcon: const Icon(
-                          Icons.phone_android_rounded,
-                          color: Colors.blue,
-                        ),
-                        //floatingLabelBehavior: FloatingLabelBehavior.never
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 220.0),
-                      child: Text(
-                        'Mot de passe',
-                        textAlign: TextAlign.start,
-                        style: TextStyle(
-                            color: Colors.blue, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    TextField(
-                      controller: _password,
-                      cursorColor: Colors.grey,
-                      decoration: InputDecoration(
-                        //labelText: 'Mot de passe',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(60.0),
-                          borderSide: const BorderSide(color: Colors.blue),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(80.0),
-                          borderSide: const BorderSide(
-                            color: Colors.grey,
-                          ),
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.lock,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 260.0),
-                      child: Text(
-                        'Noms',
-                        textAlign: TextAlign.start,
-                        style: TextStyle(
-                            color: Colors.blue, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    TextField(
-                      controller: _fullName,
-                      cursorColor: Colors.grey,
-                      decoration: InputDecoration(
-                        //labelText: 'Noms',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(60.0),
-                          borderSide: const BorderSide(color: Colors.blue),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(80.0),
-                          borderSide: const BorderSide(
-                            color: Colors.grey,
-                          ),
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.person, // Adjust icon as needed
+                          Icons.qr_code,
                           color: Colors.blue,
                         ),
                       ),
@@ -186,7 +150,7 @@ class _CreateUserState extends State<CreateUser> {
                     const Padding(
                       padding: EdgeInsets.only(right: 200.0),
                       child: Text(
-                        'Point de vente',
+                        'Nom du produit',
                         textAlign: TextAlign.start,
                         style: TextStyle(
                             color: Colors.blue, fontWeight: FontWeight.bold),
@@ -196,10 +160,10 @@ class _CreateUserState extends State<CreateUser> {
                       height: 10,
                     ),
                     TextField(
-                      controller: _sellingPoint,
+                      controller: _productName,
                       cursorColor: Colors.grey,
+                      enabled: false,
                       decoration: InputDecoration(
-                        // labelText: 'Point de vente',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(50),
                         ),
@@ -214,7 +178,7 @@ class _CreateUserState extends State<CreateUser> {
                           ),
                         ),
                         prefixIcon: const Icon(
-                          Icons.store, // Adjust icon as needed
+                          Icons.medication_liquid_sharp,
                           color: Colors.blue,
                         ),
                       ),
@@ -223,9 +187,9 @@ class _CreateUserState extends State<CreateUser> {
                       height: 16,
                     ),
                     const Padding(
-                      padding: EdgeInsets.only(right: 260.0),
+                      padding: EdgeInsets.only(right: 230.0),
                       child: Text(
-                        'Role',
+                        'Prix',
                         textAlign: TextAlign.start,
                         style: TextStyle(
                             color: Colors.blue, fontWeight: FontWeight.bold),
@@ -235,10 +199,9 @@ class _CreateUserState extends State<CreateUser> {
                       height: 10,
                     ),
                     TextField(
-                      controller: _role,
+                      controller: _unitPrice,
                       cursorColor: Colors.grey,
                       decoration: InputDecoration(
-                        // labelText: 'Role',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(50),
                         ),
@@ -253,7 +216,45 @@ class _CreateUserState extends State<CreateUser> {
                           ),
                         ),
                         prefixIcon: const Icon(
-                          Icons.work, // Adjust icon as needed
+                          Icons.monetization_on,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(right: 250.0),
+                      child: Text(
+                        'Quantité',
+                        textAlign: TextAlign.start,
+                        style: TextStyle(
+                            color: Colors.blue, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextField(
+                      controller: _quantity,
+                      cursorColor: Colors.grey,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(60.0),
+                          borderSide: const BorderSide(color: Colors.blue),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(80.0),
+                          borderSide: const BorderSide(
+                            color: Colors.grey,
+                          ),
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.numbers,
                           color: Colors.blue,
                         ),
                       ),
@@ -263,21 +264,19 @@ class _CreateUserState extends State<CreateUser> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        String phoneNumber = _phoneNumber.text;
-                        String password = _password.text;
-                        String fullName = _fullName.text;
-                        String sellingPoint = _sellingPoint.text;
-                        String role = _role.text;
-                        //String userState = 'DENIED';
+                        String productName = _productName.text;
+                        String quantityStr = _quantity.text;
+                        String unitPriceStr = _unitPrice.text;
 
-                        User newUser = User(
-                          fullName: fullName,
-                          phoneNumber: phoneNumber,
-                          password: password,
-                          sellingPoint: sellingPoint,
-                          role: role,
-                          //  userState: userState
-                        );
+                        int quantity = int.tryParse(quantityStr) ?? 0;
+
+                        double unitPrice = double.tryParse(unitPriceStr) ?? 0.0;
+
+                        Selling updatedTransaction = Selling(
+                            transactionId: widget.transactionId,
+                            productName: productName,
+                            unitPrice: unitPrice,
+                            quantity: quantity);
                         setState(() {
                           isLoading = true;
                         });
@@ -286,12 +285,27 @@ class _CreateUserState extends State<CreateUser> {
                             isLoading = false;
                           });
                         });
-                        UsersController().addUser(newUser, () {});
-                        _fullName.clear();
-                        _password.clear();
-                        _phoneNumber.clear();
-                        _role.clear();
-                        _sellingPoint.clear();
+                        SellsController().updateTransactionOnBillCode(
+                            updatedTransaction, () async {
+                          int? billCode;
+
+                          billCode = await SellsController().getLastBillCode();
+
+                          print(billCode);
+                          if (billCode != null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Bill(
+                                        billCode: billCode,
+                                      )),
+                            );
+                          }
+                        });
+
+                        _productName.clear();
+                        _unitPrice.clear();
+                        _quantity.clear();
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue),
@@ -305,7 +319,7 @@ class _CreateUserState extends State<CreateUser> {
                               ),
                             )
                           : const Text(
-                              'Créer',
+                              'Modifier',
                               style: TextStyle(
                                 color: Color.fromARGB(255, 238, 237, 237),
                               ),

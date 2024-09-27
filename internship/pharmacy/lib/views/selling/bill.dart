@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -9,6 +10,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:pharmacy/controllers/selling_controller.dart';
 import 'package:pharmacy/models/selling.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:pharmacy/services/notificationsService.dart';
+import 'package:pharmacy/views/selling/update_transaction.dart';
 
 // ignore: must_be_immutable
 class Bill extends StatefulWidget {
@@ -22,10 +25,16 @@ class Bill extends StatefulWidget {
 
 class _Bill extends State<Bill> {
   final ScrollController _scrollController = ScrollController();
+  final List<TextEditingController> _quantityController = [];
+  final List<TextEditingController> _unitPriceController = [];
+  final List<TextEditingController> _totalPriceController = [];
+  final List<TextEditingController> _sellingDateController = [];
+  final List<TextEditingController> _productNameController = [];
+  final List<TextEditingController> _transCodeController = [];
   double _floattingButOpacity = 1.0;
-
-  List<Selling> _transactions = [];
-
+  bool isLoading = true;
+  final List<Selling> _transactions = [];
+  Selling selling = Selling();
 // Future<int?> getBillCode() async{
 //   int? billCode = await SellsController().getLastBillCode();
 //   return billCode;
@@ -37,6 +46,30 @@ class _Bill extends State<Bill> {
     _scrollController.addListener(() {
       _handleScroll();
     });
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _quantityController) {
+      controller.dispose();
+    }
+    for (var controller in _productNameController) {
+      controller.dispose();
+    }
+    for (var controller in _sellingDateController) {
+      controller.dispose();
+    }
+    for (var controller in _totalPriceController) {
+      controller.dispose();
+    }
+    for (var controller in _transCodeController) {
+      controller.dispose();
+    }
+    for (var controller in _unitPriceController) {
+      controller.dispose();
+    }
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _handleScroll() {
@@ -57,7 +90,22 @@ class _Bill extends State<Bill> {
     await SellsController().getTransactionInfoByBillCode(widget.billCode,
         (transactions) {
       setState(() {
-        _transactions = transactions;
+        _transactions.addAll(transactions);
+        isLoading = false;
+        for (var transaction in transactions) {
+          _quantityController.add(
+              TextEditingController(text: transaction.quantity.toString()));
+          _productNameController
+              .add(TextEditingController(text: transaction.productName));
+          _unitPriceController.add(
+              TextEditingController(text: transaction.unitPrice.toString()));
+          _totalPriceController.add(
+              TextEditingController(text: transaction.totalPrice.toString()));
+          _sellingDateController.add(
+              TextEditingController(text: transaction.sellingDate.toString()));
+          _transCodeController.add(TextEditingController(
+              text: transaction.transactionId.toString()));
+        }
       });
     });
   }
@@ -121,7 +169,13 @@ class _Bill extends State<Bill> {
         File file = File(outputFile);
         await file.create(recursive: true);
         await file.writeAsBytes(await pdf.save());
-        Fluttertoast.showToast(msg: 'Facture téléchargé');
+        final NotificationsService notificationsService =
+            NotificationsService();
+        notificationsService.showNotification(
+            'Tape ici pour ouvrir', 'Facture téléchargée',
+            playload: outputFile);
+        Fluttertoast.showToast(
+            msg: 'Facture téléchargée, tape la notification pour ouvrir');
       } else {
         Fluttertoast.showToast(msg: 'Stockage échoué');
       }
@@ -173,67 +227,167 @@ class _Bill extends State<Bill> {
                                       scrollDirection: Axis.horizontal,
                                       child: Row(
                                         children: [
-                                          DataTable(columns: const [
-                                            DataColumn(
-                                                label: Text(
-                                              'Produit',
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            )),
-                                            DataColumn(
-                                                label: Text(
-                                              'Prix unitaire',
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            )),
-                                            DataColumn(
-                                                label: Text(
-                                              'Quantité',
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            )),
-                                            DataColumn(
-                                                label: Text(
-                                              'Prix total',
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            )),
-                                            DataColumn(
-                                                label: Text(
-                                              'Date',
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ))
-                                          ], rows: [
-                                            ...List.generate(
-                                                _transactions.length, (index) {
-                                              Selling selling =
-                                                  _transactions[index];
-                                              return DataRow(cells: [
-                                                DataCell(
-                                                    Text(selling.productName!)),
-                                                DataCell(Text(selling.unitPrice
-                                                    .toString())),
-                                                DataCell(Text(selling.quantity
-                                                    .toString())),
-                                                DataCell(Text(selling.totalPrice
-                                                    .toString())),
-                                                DataCell(Text(selling
-                                                    .sellingDate
-                                                    .toString()))
-                                              ]);
-                                            })
-                                          ]),
+                                          isLoading
+                                              ? const Center(
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                          color: Colors.blue,
+                                                          strokeWidth: 5.0),
+                                                )
+                                              : DataTable(columns: const [
+                                                  DataColumn(
+                                                      label: Text(
+                                                    'Num',
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  )),
+                                                  DataColumn(
+                                                      label: Text(
+                                                    'Produit',
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  )),
+                                                  DataColumn(
+                                                      label: Text(
+                                                    'Prix unitaire',
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  )),
+                                                  DataColumn(
+                                                      label: Text(
+                                                    'Quantité',
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  )),
+                                                  DataColumn(
+                                                      label: Text(
+                                                    'Prix total',
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  )),
+                                                  DataColumn(
+                                                      label: Text(
+                                                    'Date',
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  )),
+                                                  DataColumn(
+                                                      label: Text(
+                                                    'Action',
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ))
+                                                ], rows: [
+                                                  ...List.generate(
+                                                      _transactions.length,
+                                                      (index) {
+                                                    Selling selling =
+                                                        _transactions[index];
+
+                                                    return DataRow(cells: [
+                                                      DataCell(Text(selling
+                                                          .transactionId
+                                                          .toString())),
+                                                      DataCell(Text(selling
+                                                          .productName!)),
+                                                      DataCell(Text(selling
+                                                          .unitPrice
+                                                          .toString())),
+                                                      DataCell(Text(selling
+                                                          .quantity
+                                                          .toString())),
+                                                      DataCell(Text(selling
+                                                          .totalPrice
+                                                          .toString())),
+                                                      DataCell(Text(selling
+                                                          .sellingDate
+                                                          .toString())),
+                                                      DataCell(Row(
+                                                        children: [
+                                                          GestureDetector(
+                                                            onTap: () {
+                                                              Navigator.push(
+                                                                  context,
+                                                                  MaterialPageRoute(
+                                                                      builder: (context) =>
+                                                                          UpdateTransaction(
+                                                                              transactionId: selling.transactionId)));
+                                                            },
+                                                            child: const Icon(
+                                                                Icons.edit),
+                                                          ),
+                                                          GestureDetector(
+                                                            onTap: () {
+                                                              showDialog(
+                                                                  context:
+                                                                      context,
+                                                                  builder:
+                                                                      (context) =>
+                                                                          AlertDialog(
+                                                                            title:
+                                                                                const Text(''),
+                                                                            content:
+                                                                                const Text(
+                                                                              'Veux-tu vraiment supprimer cette transaction?',
+                                                                              style: TextStyle(
+                                                                                color: Colors.blue,
+                                                                              ),
+                                                                            ),
+                                                                            actions: [
+                                                                              Row(
+                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                children: [
+                                                                                  TextButton(
+                                                                                      onPressed: () {
+                                                                                        Navigator.of(context).pop();
+                                                                                      },
+                                                                                      child: const Text(
+                                                                                        'Non',
+                                                                                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                                                                                      )),
+                                                                                  TextButton(
+                                                                                      onPressed: () {
+                                                                                        SellsController().deleteTransaction(selling.transactionId!, () {});
+                                                                                        Navigator.of(context).pop();
+                                                                                      },
+                                                                                      child: const Text(
+                                                                                        'Oui',
+                                                                                        style: TextStyle(color: Colors.black),
+                                                                                      ))
+                                                                                ],
+                                                                              )
+                                                                            ],
+                                                                          ));
+                                                            },
+                                                            child: const Icon(Icons
+                                                                .delete_outline_outlined),
+                                                          ),
+                                                        ],
+                                                      ))
+                                                    ]);
+                                                  })
+                                                ]),
                                         ],
                                       ),
                                     )),
@@ -279,6 +433,7 @@ class _Bill extends State<Bill> {
                   child: FloatingActionButton(
                     onPressed: () {
                       _downloadPDF();
+                      SellsController().setBillCode();
                     },
                     backgroundColor: Colors.blue,
                     child: const Icon(Icons.download),
@@ -287,16 +442,16 @@ class _Bill extends State<Bill> {
                 const SizedBox(
                   width: 10,
                 ),
-                Opacity(
-                  opacity: _floattingButOpacity,
-                  child: FloatingActionButton(
-                    onPressed: () {
-                      SellsController().setBillCode();
-                    },
-                    backgroundColor: Colors.blue,
-                    child: const Icon(Icons.check),
-                  ),
-                )
+                // Opacity(
+                //   opacity: _floattingButOpacity,
+                //   child: FloatingActionButton(
+                //     onPressed: () {
+
+                //     },
+                //     backgroundColor: Colors.blue,
+                //     child: const Icon(Icons.check),
+                //   ),
+                // )
               ],
             ),
           )

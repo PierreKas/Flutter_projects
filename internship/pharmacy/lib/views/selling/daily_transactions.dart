@@ -24,6 +24,7 @@ class _DailyTransactionsList extends State<DailyTransactionsList> {
   final ScrollController _scrollController = ScrollController();
   double _floattingButOpacity = 1.0;
   final TextEditingController _searchedDate = TextEditingController();
+  bool isLoading = true;
 
   DateTime? _selectedDate;
   // final DateTime? sellingDate;
@@ -36,6 +37,13 @@ class _DailyTransactionsList extends State<DailyTransactionsList> {
     _scrollController.addListener(() {
       _handleScroll();
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchedDate.dispose();
+    super.dispose();
   }
 
   void _handleScroll() {
@@ -57,6 +65,7 @@ class _DailyTransactionsList extends State<DailyTransactionsList> {
         (transactions) {
       setState(() {
         _transactions = transactions;
+        isLoading = false;
       });
     });
   }
@@ -224,7 +233,7 @@ class _DailyTransactionsList extends State<DailyTransactionsList> {
                                 Padding(
                                   padding: EdgeInsets.all(16),
                                   child: Text(
-                                    'Product code',
+                                    'Noms',
                                     style: TextStyle(
                                         fontSize: 12, color: Colors.black),
                                   ),
@@ -232,7 +241,7 @@ class _DailyTransactionsList extends State<DailyTransactionsList> {
                                 Padding(
                                   padding: EdgeInsets.all(16),
                                   child: Text(
-                                    'Unit Price',
+                                    'Prix unitaire',
                                     style: TextStyle(
                                         fontSize: 12, color: Colors.black),
                                   ),
@@ -240,7 +249,7 @@ class _DailyTransactionsList extends State<DailyTransactionsList> {
                                 Padding(
                                   padding: EdgeInsets.all(16),
                                   child: Text(
-                                    'Quantity',
+                                    'Quantité',
                                     style: TextStyle(
                                         fontSize: 12, color: Colors.black),
                                   ),
@@ -248,7 +257,7 @@ class _DailyTransactionsList extends State<DailyTransactionsList> {
                                 Padding(
                                   padding: EdgeInsets.all(16),
                                   child: Text(
-                                    'Total price',
+                                    'Prix total',
                                     style: TextStyle(
                                         fontSize: 12, color: Colors.black),
                                   ),
@@ -266,61 +275,75 @@ class _DailyTransactionsList extends State<DailyTransactionsList> {
                         return false;
                       },
                       child: Expanded(
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          itemCount: _transactions.length,
-                          itemBuilder: (context, index) {
-                            Selling selling = _transactions[index];
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: Table(
-                                border: TableBorder.all(color: Colors.black),
-                                columnWidths: const {
-                                  0: FlexColumnWidth(1.5),
-                                  1: FlexColumnWidth(1.5),
-                                  2: FlexColumnWidth(1.5),
-                                  3: FlexColumnWidth(1.5),
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 50,
+                                width: 50,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                      color: Colors.blue, strokeWidth: 5.0),
+                                ),
+                              )
+                            : ListView.builder(
+                                controller: _scrollController,
+                                itemCount: _transactions.length,
+                                itemBuilder: (context, index) {
+                                  Selling selling = _transactions[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Table(
+                                      border:
+                                          TableBorder.all(color: Colors.black),
+                                      columnWidths: const {
+                                        0: FlexColumnWidth(1.5),
+                                        1: FlexColumnWidth(1.5),
+                                        2: FlexColumnWidth(1.5),
+                                        3: FlexColumnWidth(1.5),
+                                      },
+                                      children: [
+                                        TableRow(children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(16),
+                                            child: Text(
+                                              selling.productName!,
+                                              style: const TextStyle(
+                                                  fontSize: 10,
+                                                  color: Colors.black),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(16),
+                                            child: Text(
+                                              selling.unitPrice.toString(),
+                                              style: const TextStyle(
+                                                  fontSize: 10,
+                                                  color: Colors.black),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(18),
+                                            child: Text(
+                                              selling.quantity.toString(),
+                                              style: const TextStyle(
+                                                  fontSize: 10,
+                                                  color: Colors.black),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(18),
+                                            child: Text(
+                                              selling.totalPrice.toString(),
+                                              style: const TextStyle(
+                                                  fontSize: 10,
+                                                  color: Colors.black),
+                                            ),
+                                          )
+                                        ]),
+                                      ],
+                                    ),
+                                  );
                                 },
-                                children: [
-                                  TableRow(children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(16),
-                                      child: Text(
-                                        selling.productCode!,
-                                        style: const TextStyle(
-                                            fontSize: 10, color: Colors.black),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(16),
-                                      child: Text(
-                                        selling.unitPrice.toString(),
-                                        style: const TextStyle(
-                                            fontSize: 10, color: Colors.black),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(18),
-                                      child: Text(
-                                        selling.quantity.toString(),
-                                        style: const TextStyle(
-                                            fontSize: 10, color: Colors.black),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(18),
-                                      child: Text(
-                                        selling.totalPrice.toString(),
-                                        style: const TextStyle(
-                                            fontSize: 10, color: Colors.black),
-                                      ),
-                                    )
-                                  ]),
-                                ],
                               ),
-                            );
-                          },
-                        ),
                       ),
                     ),
                   ],
@@ -357,6 +380,7 @@ class _DailyTransactionsList extends State<DailyTransactionsList> {
                     )),
                 const SizedBox(height: 15),
                 Row(
+                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: TextFormField(
@@ -413,7 +437,13 @@ class _DailyTransactionsList extends State<DailyTransactionsList> {
                             });
                           });
                         },
-                        child: const Icon(Icons.refresh))
+                        child: const Icon(Icons.refresh)
+                        // child: Container(
+                        //   height: 20,
+                        //   width: 20,
+                        //   decoration: const BoxDecoration(color: Colors.blue),
+                        // ),
+                        )
                   ],
                 ),
               ],

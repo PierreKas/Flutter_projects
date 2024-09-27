@@ -1,28 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:pharmacy/controllers/users_controller.dart';
-import 'package:pharmacy/models/users.dart';
-import 'package:pharmacy/views/users/create_user.dart';
-import 'package:pharmacy/views/users/update_user.dart';
-import 'package:pharmacy/views/users/users_management.dart';
+import 'package:pharmacy/controllers/clients_controller.dart';
+import 'package:pharmacy/models/client.dart';
+import 'package:pharmacy/views/clients/create_client.dart';
 
-class UsersList extends StatefulWidget {
-  const UsersList({super.key});
+class ClientsList extends StatefulWidget {
+  const ClientsList({super.key});
 
   @override
-  State<UsersList> createState() => _UsersListState();
+  State<ClientsList> createState() => _ClientsListState();
 }
 
-class _UsersListState extends State<UsersList> {
+class _ClientsListState extends State<ClientsList> {
   bool isLoading = true;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _fetchUsers();
+    _fetchClients();
   }
 
-  void _fetchUsers() async {
-    await UsersController().getUsers(() {
+  void _fetchClients() async {
+    await ClientsController().getClients(() {
       setState(() {
         isLoading = false;
       });
@@ -62,7 +60,7 @@ class _UsersListState extends State<UsersList> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     const Text(
-                      'Liste des utilisateurs',
+                      'Liste des clients',
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
@@ -79,19 +77,25 @@ class _UsersListState extends State<UsersList> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                const UsersManagement()));
+                                                const CreateClient()));
                                   },
-                                  child: const Text('Gérer les utilisateurs')),
+                                  child: const Text('Ajouter un client')),
                               PopupMenuItem(
                                   onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const CreateUser()));
+                                    // Navigator.push(
+                                    //     context,
+                                    //     MaterialPageRoute(
+                                    //         builder: (context) =>
+                                    //             const CreateUser()));
                                   },
-                                  child: const Text('Ajouter un utilisateur')),
+                                  child: const Text('')),
                             ]),
+                    // GestureDetector(
+                    //   onTap: () {
+                    //     _fetchClients();
+                    //   },
+                    //   child: const Icon(Icons.refresh),
+                    // )
                   ],
                 ),
                 const SizedBox(
@@ -108,9 +112,10 @@ class _UsersListState extends State<UsersList> {
                           ),
                         )
                       : ListView.builder(
-                          itemCount: UsersController.usersList.length,
+                          itemCount: ClientsController.clientsList.length,
                           itemBuilder: (context, index) {
-                            User user = UsersController.usersList[index];
+                            Client client =
+                                ClientsController.clientsList[index];
                             return Padding(
                               padding: const EdgeInsets.only(top: 25),
                               child: Column(
@@ -121,15 +126,15 @@ class _UsersListState extends State<UsersList> {
                                         horizontal: 20),
                                     child: GestureDetector(
                                       onTap: () {
-                                        int? userId;
-                                        userId = user.userId;
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    UpdateUser(
-                                                      userId: userId!,
-                                                    )));
+                                        // int? userId;
+                                        // userId = user.userId;
+                                        // Navigator.push(
+                                        //     context,
+                                        //     MaterialPageRoute(
+                                        //         builder: (context) =>
+                                        //             UpdateUser(
+                                        //               userId: userId!,
+                                        //             )));
                                       },
                                       child: Container(
                                         height: 125,
@@ -145,28 +150,23 @@ class _UsersListState extends State<UsersList> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                user.fullName,
+                                                client.fullName,
                                                 style: const TextStyle(
                                                     fontSize: 30,
                                                     fontWeight:
                                                         FontWeight.normal),
                                               ),
                                               Text(
-                                                user.phoneNumber,
+                                                client.phoneNumber,
                                                 style: const TextStyle(
                                                     fontSize: 15,
                                                     fontWeight:
-                                                        FontWeight.normal),
+                                                        FontWeight.normal,
+                                                    fontStyle:
+                                                        FontStyle.italic),
                                               ),
                                               Text(
-                                                user.role!,
-                                                style: const TextStyle(
-                                                    fontSize: 15,
-                                                    fontWeight:
-                                                        FontWeight.normal),
-                                              ),
-                                              Text(
-                                                user.sellingPoint,
+                                                client.address!,
                                                 style: const TextStyle(
                                                     fontSize: 15,
                                                     fontWeight: FontWeight.bold,

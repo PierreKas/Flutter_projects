@@ -56,12 +56,12 @@ class UsersDatabaseHelper {
     }
   }
 
-  Future<Map<String, dynamic>?> getUserInfoToDB(String phoneNumber) async {
+  Future<Map<String, dynamic>?> getUserInfoToDB(int userId) async {
     final conn = await DatabaseHelper.getConnection();
     if (conn == null) {
       return null;
     }
-    final sql = 'SELECT * FROM users WHERE phone_number=' "$phoneNumber" '';
+    final sql = 'SELECT * FROM users WHERE user_id=' "$userId" '';
 
     try {
       final results = await conn.execute(sql);
@@ -71,9 +71,8 @@ class UsersDatabaseHelper {
         Fluttertoast.showToast(msg: 'User info retrieved successfully');
         return user;
       } else {
-        print('No user found with the code :$phoneNumber');
-        Fluttertoast.showToast(
-            msg: 'No user found with the code :$phoneNumber');
+        print('No user found with the code : US$userId');
+        Fluttertoast.showToast(msg: 'No user found with the code : US$userId');
         return null;
       }
     } catch (e) {
@@ -102,13 +101,13 @@ class UsersDatabaseHelper {
     //     );
     //await conn.close();
     final sql = '''
-    INSERT INTO users (Full_name, phone_number, role, selling_point, pwd, user_state) 
+    INSERT INTO users (Full_name, role, selling_point, pwd,phone_number,user_state) 
     VALUES (
       '${user.fullName}', 
-      '${user.phoneNumber}', 
       '${user.role}', 
       '${user.sellingPoint}', 
       '${user.password}', 
+      '${user.phoneNumber}', 
       'DENIED'
     )
   ''';
@@ -119,6 +118,7 @@ class UsersDatabaseHelper {
       Fluttertoast.showToast(msg: 'Utilisateur ajouté');
     } catch (e) {
       print('Error during INSERT operation: $e');
+      Fluttertoast.showToast(msg: 'Une erreur s\'est produite');
     } finally {
       await conn.close();
     }
@@ -133,10 +133,11 @@ class UsersDatabaseHelper {
   UPDATE users 
   SET 
     Full_name = '${user.fullName}', 
-    pwd = '${user.password}'
+    pwd = '${user.password}',
+    phone_number = '${user.phoneNumber}'
     
   WHERE 
-    phone_number = '${user.phoneNumber}'
+    user_id = '${user.userId}'
   ''';
     try {
       final results = await conn.execute(sql);
@@ -144,10 +145,10 @@ class UsersDatabaseHelper {
         print('User info updated');
         Fluttertoast.showToast(msg: 'Données modifiées');
       } else {
-        print('No user found with the phone number :${user.phoneNumber}');
+        print('No user found with the code : US${user.phoneNumber}');
         Fluttertoast.showToast(
             msg:
-                'Le numéro ${user.phoneNumber} ne correspond à aucun utilisateur');
+                'Le code US${user.phoneNumber} ne correspond à aucun utilisateur');
         return null;
       }
     } catch (e) {
@@ -160,7 +161,7 @@ class UsersDatabaseHelper {
   }
 
   Future<Map<String, dynamic>?> updateUserStatusInTheDB(
-      String phoneNumber, String userState) async {
+      int userId, String userState) async {
     final conn = await DatabaseHelper.getConnection();
     if (conn == null) {
       return null;
@@ -172,7 +173,7 @@ class UsersDatabaseHelper {
     
     
   WHERE 
-    phone_number = '$phoneNumber'
+    user_id = '$userId'
   ''';
     try {
       final results = await conn.execute(sql);
@@ -180,9 +181,9 @@ class UsersDatabaseHelper {
         print('User info updated');
         Fluttertoast.showToast(msg: 'Statut modifié');
       } else {
-        print('No user found with the phone number :$phoneNumber');
+        print('No user found with the code : US$userId');
         Fluttertoast.showToast(
-            msg: 'Le numéro $phoneNumber ne correspond à aucun utilisateur');
+            msg: 'Le code US$userId ne correspond à aucun utilisateur');
         return null;
       }
     } catch (e) {

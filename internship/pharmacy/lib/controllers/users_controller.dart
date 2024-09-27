@@ -8,6 +8,7 @@ class UsersController {
   static List<User> usersList = [];
   static String userRole = '';
   String userStatus = '';
+  static int userId = 0;
 
   Future<void> addUser(User user, Function callback) async {
     if (user.fullName.isEmpty) {
@@ -29,8 +30,6 @@ class UsersController {
       await dbHelper.addUserToDB(user);
       usersList.add(user);
       callback();
-
-      Fluttertoast.showToast(msg: 'Utilisateur ajouté');
     } catch (e) {
       Fluttertoast.showToast(msg: 'Erreur lors de l\'ajout de l\'utilisateur');
     }
@@ -46,13 +45,23 @@ class UsersController {
 
       usersList = usersData.map((userData) {
         return User(
-          fullName: userData['Full_name'],
-          phoneNumber: userData['phone_number'],
-          role: userData['role'],
-          sellingPoint: userData['selling_point'],
-          password: userData['pwd'],
-          userState: userData['user_state'],
-        );
+            fullName: userData['Full_name'],
+            phoneNumber: userData['phone_number'],
+            role: userData['role'],
+            sellingPoint: userData['selling_point'],
+            password: userData['pwd'],
+            userState: userData['user_state'],
+            // userId: userData['user_id'],
+            userId: (userData['user_id'] is int)
+                ? userData['user_id'] as int
+                : int.tryParse(userData['user_id'] as String)
+
+            /**
+       *  quantity: (productData['quantity'] is int)
+              ? productData['quantity'] as int
+              : int.tryParse(productData['quantity'] as String) ?? 0,
+       */
+            );
       }).toList();
 
       callback();
@@ -74,13 +83,15 @@ class UsersController {
 
       usersList = usersData.map((userData) {
         return User(
-          fullName: userData['Full_name'],
-          phoneNumber: userData['phone_number'],
-          role: userData['role'],
-          sellingPoint: userData['selling_point'],
-          password: userData['pwd'],
-          userState: userData['user_state'],
-        );
+            fullName: userData['Full_name'],
+            phoneNumber: userData['phone_number'],
+            role: userData['role'],
+            sellingPoint: userData['selling_point'],
+            password: userData['pwd'],
+            userState: userData['user_state'],
+            userId: (userData['user_id'] is int)
+                ? userData['user_id'] as int
+                : int.tryParse(userData['user_id'] as String));
       }).toList();
 
       callback(usersList);
@@ -106,6 +117,15 @@ class UsersController {
         print('Utilisateur trouvé');
         userRole = userData['role'];
         userStatus = userData['user_state'];
+        //  userId = userData['user_id'];
+        userId = ((userData['user_id'] is int)
+            ? userData['user_id'] as int
+            : int.tryParse(userData['user_id'] as String))!;
+        /**
+         * userId: (userData['user_id'] is int)
+                ? userData['user_id'] as int
+                : int.tryParse(userData['user_id'] as String)
+         */
         if (userStatus.toLowerCase() == 'approved') {
           Navigator.push(context, MaterialPageRoute(builder: (context) {
             return const Home();
@@ -128,28 +148,29 @@ class UsersController {
     }
   }
 
-  Future<void> getUserInfo(String phoneNumber, Function callback) async {
+  Future<void> getUserInfo(int userId, Function callback) async {
     try {
       UsersDatabaseHelper dbHelper = UsersDatabaseHelper();
-      Map<String, dynamic>? userData =
-          await dbHelper.getUserInfoToDB(phoneNumber);
+      Map<String, dynamic>? userData = await dbHelper.getUserInfoToDB(userId);
 
       // usersList.clear();
       print('Raw product data: $userData');
 
       if (userData != null) {
         User user = User(
-          fullName: userData['Full_name'] as String,
-          phoneNumber: userData['phone_number'] as String,
-          sellingPoint: (userData['selling_point'] as String),
-          password: (userData['pwd'] as String),
-          role: userData['role'] as String,
-          userState: userData['user_state'] as String,
-        );
+            fullName: userData['Full_name'] as String,
+            phoneNumber: userData['phone_number'] as String,
+            sellingPoint: (userData['selling_point'] as String),
+            password: (userData['pwd'] as String),
+            role: userData['role'] as String,
+            userState: userData['user_state'] as String,
+            userId: (userData['user_id'] is int)
+                ? userData['user_id'] as int
+                : int.tryParse(userData['user_id'] as String));
         callback(user);
       } else {
         Fluttertoast.showToast(
-            msg: 'No product found with the code: $phoneNumber');
+            msg: 'No product found with the code: US$userId');
       }
     } catch (e) {
       print('Error: $e');
@@ -172,7 +193,7 @@ class UsersController {
         usersList[index] = user;
       }
       callback();
-      getUsers(callback);
+      await getUsers(callback);
     } catch (e) {
       Fluttertoast.showToast(
           msg: 'Erreur lors de la mise à jour des données de l\'utilisateur');
@@ -180,16 +201,16 @@ class UsersController {
   }
 
   Future<void> updateUserStatus(
-      String phoneNumber, String userState, Function callback) async {
+      int userId, String userState, Function callback) async {
     try {
       UsersDatabaseHelper dbHelper = UsersDatabaseHelper();
-      await dbHelper.updateUserStatusInTheDB(phoneNumber, userState);
-      int index = usersList.indexWhere((p) => p.phoneNumber == phoneNumber);
+      await dbHelper.updateUserStatusInTheDB(userId, userState);
+      int index = usersList.indexWhere((p) => p.userId == userId);
       if (index != -1) {
         usersList[index].userState = userState;
       }
       callback();
-      getUsers2((List<User> users) {
+      await getUsers2((List<User> users) {
         usersList = users;
       });
     } catch (e) {

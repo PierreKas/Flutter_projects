@@ -13,7 +13,9 @@ class ProductDatabaseHelper {
       final results = await conn.execute(sql);
       final products = results.rows.map((row) => row.assoc()).toList();
 
-      print('Products retried successfully');
+      print('Products retrived successfully');
+      Fluttertoast.showToast(msg: 'Produits récupérés avec succès');
+
       return products;
     } catch (e) {
       print('Error during SELECT operation: $e');
@@ -100,7 +102,15 @@ class ProductDatabaseHelper {
       print('product added successfully');
       Fluttertoast.showToast(msg: 'Produit ajouté');
     } catch (e) {
-      print('Error during INSERT operation: $e');
+      if (e
+          .toString()
+          .contains('This medecine will expiry in one month or less')) {
+        Fluttertoast.showToast(
+            msg: 'Ce medicament va expirer dans un mois ou moins');
+      } else {
+        print('Error during INSERT operation: $e');
+        Fluttertoast.showToast(msg: 'Tes données contiennent une erreur');
+      }
     } finally {
       await conn.close();
     }

@@ -30,6 +30,9 @@ dependencies:
   path_provider: ^2.0.11
   permission_handler: ^11.2.0
   pdf: #^3.11.1
+  flutter_local_notifications:
+  open_file: ^3.2.1
+  http: ^1.2.2
   
 
 dev_dependencies:
@@ -73,3 +76,4 @@ flutter:
     - assets/dawa3.jpg
     - assets/dawa4.jpg
     - assets/dawa5.jpg
+    - assets/professional-medical-doctor-hand-giving-medicine-photo.jpg

@@ -10,6 +10,9 @@ class UsersManagement extends StatefulWidget {
 }
 
 class _UsersManagementState extends State<UsersManagement> {
+  bool isLoading = true;
+  bool isLoadingBtnDeny = false;
+  bool isLoadingBtnApprove = false;
   List<User> _usersDetails = [];
   @override
   void initState() {
@@ -23,6 +26,7 @@ class _UsersManagementState extends State<UsersManagement> {
       await UsersController().getUsers2((List<User> usersDetails) {
         setState(() {
           _usersDetails = usersDetails;
+          isLoading = false;
           print(usersDetails);
         });
       });
@@ -31,8 +35,8 @@ class _UsersManagementState extends State<UsersManagement> {
     }
   }
 
-  void _updateUserState(String? phoneNumber, String? userState) async {
-    await UsersController().updateUserStatus(phoneNumber!, userState ?? '', () {
+  void _updateUserState(int userId, String? userState) async {
+    await UsersController().updateUserStatus(userId, userState ?? '', () {
       setState(() {});
     });
   }
@@ -48,12 +52,25 @@ class _UsersManagementState extends State<UsersManagement> {
                 padding: const EdgeInsets.only(top: 50),
                 child: Column(
                   children: [
-                    const Text(
-                      'GESTION DES UTILISATEURS',
-                      style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8, right: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'GESTION DES UTILISATEURS',
+                            style: TextStyle(
+                                fontStyle: FontStyle.italic,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20),
+                          ),
+                          GestureDetector(
+                              onTap: () {
+                                _fetchUsers();
+                              },
+                              child: const Icon(Icons.refresh))
+                        ],
+                      ),
                     ),
                     //  const Text('Facture N*}'),
                     const SizedBox(
@@ -70,115 +87,183 @@ class _UsersManagementState extends State<UsersManagement> {
                                     scrollDirection: Axis.horizontal,
                                     child: Row(
                                       children: [
-                                        DataTable(columns: const [
-                                          DataColumn(
-                                              label: Text(
-                                            'Name',
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          )),
-                                          DataColumn(
-                                              label: Text(
-                                            'Téléphone',
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          )),
-                                          DataColumn(
-                                              label: Text(
-                                            'Role',
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          )),
-                                          DataColumn(
-                                              label: Text(
-                                            'Point de vente',
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          )),
-                                          DataColumn(
-                                              label: Text(
-                                            'User State',
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          )),
-                                          DataColumn(
-                                              label: Text(
-                                            'Actions',
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ))
-                                        ], rows: [
-                                          ...List.generate(_usersDetails.length,
-                                              (index) {
-                                            User user = _usersDetails[index];
-                                            return DataRow(cells: [
-                                              DataCell(Text(user.fullName)),
-                                              DataCell(Text(user.phoneNumber)),
-                                              DataCell(Text(user.role ?? '')),
-                                              DataCell(Text(user.sellingPoint)),
-                                              DataCell(
-                                                  Text(user.userState ?? '')),
-                                              DataCell(Row(
-                                                children: [
-                                                  Container(
-                                                    height: 40,
-                                                    width: 100,
-                                                    decoration:
-                                                        const BoxDecoration(
-                                                            color:
-                                                                Colors.green),
-                                                    child: TextButton(
-                                                        onPressed: () {
-                                                          _updateUserState(
-                                                              user.phoneNumber,
-                                                              'APPROVED');
-                                                        },
-                                                        child: const Text(
-                                                          'Approve',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.white),
-                                                        )),
+                                        isLoading
+                                            ? const Center(
+                                                child:
+                                                    CircularProgressIndicator(
+                                                        color: Colors.blue,
+                                                        strokeWidth: 5.0),
+                                              )
+                                            : DataTable(columns: const [
+                                                DataColumn(
+                                                    label: Text(
+                                                  'Name',
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.bold,
                                                   ),
-                                                  const SizedBox(
-                                                    width: 5,
+                                                )),
+                                                DataColumn(
+                                                    label: Text(
+                                                  'Téléphone',
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.bold,
                                                   ),
-                                                  Container(
-                                                    height: 40,
-                                                    width: 100,
-                                                    decoration:
-                                                        const BoxDecoration(
-                                                            color: Colors.red),
-                                                    child: TextButton(
-                                                        onPressed: () {
-                                                          _updateUserState(
-                                                              user.phoneNumber,
-                                                              'DENIED');
-                                                        },
-                                                        child: const Text(
-                                                          'Deny',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.white),
-                                                        )),
-                                                  )
-                                                ],
-                                              ))
-                                            ]);
-                                          })
-                                        ]),
+                                                )),
+                                                DataColumn(
+                                                    label: Text(
+                                                  'Role',
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                )),
+                                                DataColumn(
+                                                    label: Text(
+                                                  'Point de vente',
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                )),
+                                                DataColumn(
+                                                    label: Text(
+                                                  'User State',
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                )),
+                                                DataColumn(
+                                                    label: Text(
+                                                  'Actions',
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ))
+                                              ], rows: [
+                                                ...List.generate(
+                                                    _usersDetails.length,
+                                                    (index) {
+                                                  User user =
+                                                      _usersDetails[index];
+                                                  return DataRow(cells: [
+                                                    DataCell(
+                                                        Text(user.fullName)),
+                                                    DataCell(
+                                                        Text(user.phoneNumber)),
+                                                    DataCell(
+                                                        Text(user.role ?? '')),
+                                                    DataCell(Text(
+                                                        user.sellingPoint)),
+                                                    DataCell(Text(
+                                                        user.userState ?? '')),
+                                                    DataCell(Row(
+                                                      children: [
+                                                        Container(
+                                                          height: 40,
+                                                          width: 100,
+                                                          decoration:
+                                                              const BoxDecoration(
+                                                                  color: Colors
+                                                                      .red),
+                                                          child: TextButton(
+                                                              onPressed: () {
+                                                                setState(() {
+                                                                  isLoadingBtnDeny =
+                                                                      true;
+                                                                });
+                                                                Future.delayed(
+                                                                    const Duration(
+                                                                        seconds:
+                                                                            5),
+                                                                    () {
+                                                                  setState(() {
+                                                                    isLoadingBtnDeny =
+                                                                        false;
+                                                                  });
+                                                                });
+                                                                _updateUserState(
+                                                                    user.userId!,
+                                                                    'DENIED');
+                                                              },
+                                                              child: isLoadingBtnDeny
+                                                                  ? const SizedBox(
+                                                                      height:
+                                                                          20,
+                                                                      width: 20,
+                                                                      child:
+                                                                          CircularProgressIndicator(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        strokeWidth:
+                                                                            2,
+                                                                      ),
+                                                                    )
+                                                                  : const Text(
+                                                                      'Deny',
+                                                                      style: TextStyle(
+                                                                          color:
+                                                                              Colors.white),
+                                                                    )),
+                                                        ),
+                                                        // const SizedBox(
+                                                        //   width: 5,
+                                                        // ),
+                                                        Container(
+                                                          height: 40,
+                                                          width: 100,
+                                                          decoration:
+                                                              const BoxDecoration(
+                                                                  color: Colors
+                                                                      .green),
+                                                          child: TextButton(
+                                                              onPressed: () {
+                                                                setState(() {
+                                                                  isLoadingBtnApprove =
+                                                                      true;
+                                                                });
+                                                                Future.delayed(
+                                                                    const Duration(
+                                                                        seconds:
+                                                                            5),
+                                                                    () {
+                                                                  setState(() {
+                                                                    isLoadingBtnApprove =
+                                                                        false;
+                                                                  });
+                                                                });
+                                                                _updateUserState(
+                                                                    user.userId!,
+                                                                    'APPROVED');
+                                                              },
+                                                              child: isLoadingBtnApprove
+                                                                  ? const SizedBox(
+                                                                      height:
+                                                                          20,
+                                                                      width: 20,
+                                                                      child:
+                                                                          CircularProgressIndicator(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        strokeWidth:
+                                                                            2,
+                                                                      ),
+                                                                    )
+                                                                  : const Text(
+                                                                      'Approve',
+                                                                      style: TextStyle(
+                                                                          color:
+                                                                              Colors.white),
+                                                                    )),
+                                                        ),
+                                                      ],
+                                                    ))
+                                                  ]);
+                                                })
+                                              ]),
                                       ],
                                     ),
                                   )),

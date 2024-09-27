@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pharmacy/controllers/clients_controller.dart';
 import 'package:pharmacy/controllers/selling_controller.dart';
+import 'package:pharmacy/models/client.dart';
 import 'package:pharmacy/models/selling.dart';
 import 'package:pharmacy/views/selling/bill.dart';
 import 'package:pharmacy/views/selling/daily_transactions.dart';
 
+// ignore: must_be_immutable
 class SellingForm extends StatefulWidget {
-  const SellingForm({super.key});
+  int userId;
+  SellingForm({super.key, required this.userId});
 
   @override
   State<SellingForm> createState() => _AddProductState();
@@ -21,15 +25,21 @@ class _AddProductState extends State<SellingForm> {
 
   final TextEditingController _quantity = TextEditingController();
 
-  final TextEditingController _sellerPhoneNumber = TextEditingController();
+  final TextEditingController _userId = TextEditingController();
 
+  final TextEditingController _clientId = TextEditingController();
+
+  bool isLoading = false;
+  List<Client> clients = [];
+  Client? selectedClient;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _quantity.addListener(_calculateTotalPrice);
     _unitPrice.addListener(_calculateTotalPrice);
-    _sellerPhoneNumber.addListener(_phono);
+    _userId.text = widget.userId.toString();
+    _fetchClients();
   }
 
   @override
@@ -39,13 +49,9 @@ class _AddProductState extends State<SellingForm> {
     _unitPrice.dispose();
     _totalPrice.dispose();
     _quantity.dispose();
-    _sellerPhoneNumber.dispose();
+    _userId.dispose();
+    _clientId.dispose();
     super.dispose();
-  }
-
-  String _phono() {
-    String phone = '0900000000';
-    return phone;
   }
 
   void _calculateTotalPrice() {
@@ -55,6 +61,14 @@ class _AddProductState extends State<SellingForm> {
 
     setState(() {
       _totalPrice.text = totalPrice.toStringAsFixed(2);
+    });
+  }
+
+  void _fetchClients() async {
+    await ClientsController().getClients2((List<Client> fetchedClients) {
+      setState(() {
+        clients = fetchedClients;
+      });
     });
   }
 
@@ -171,10 +185,6 @@ class _AddProductState extends State<SellingForm> {
                       controller: _productCode,
                       cursorColor: Colors.grey,
                       decoration: InputDecoration(
-                        // labelText: 'Tél',
-                        // labelStyle: const TextStyle(
-                        //   color: Color.fromARGB(255, 177, 223, 179),
-                        // ),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(50)),
                         focusedBorder: OutlineInputBorder(
@@ -189,7 +199,6 @@ class _AddProductState extends State<SellingForm> {
                           Icons.qr_code,
                           color: Colors.blue,
                         ),
-                        //floatingLabelBehavior: FloatingLabelBehavior.never
                       ),
                     ),
                     const SizedBox(
@@ -211,7 +220,6 @@ class _AddProductState extends State<SellingForm> {
                       controller: _unitPrice,
                       cursorColor: Colors.grey,
                       decoration: InputDecoration(
-                        //labelText: 'Mot de passe',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(50),
                         ),
@@ -250,7 +258,6 @@ class _AddProductState extends State<SellingForm> {
                       controller: _quantity,
                       cursorColor: Colors.grey,
                       decoration: InputDecoration(
-                        // labelText: 'Point de vente',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(50),
                         ),
@@ -265,7 +272,7 @@ class _AddProductState extends State<SellingForm> {
                           ),
                         ),
                         prefixIcon: const Icon(
-                          Icons.numbers, // Adjust icon as needed
+                          Icons.numbers,
                           color: Colors.blue,
                         ),
                       ),
@@ -290,8 +297,6 @@ class _AddProductState extends State<SellingForm> {
                       cursorColor: Colors.grey,
                       enabled: false,
                       decoration: InputDecoration(
-                        //labelText: 'Noms',
-
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(50),
                         ),
@@ -306,7 +311,7 @@ class _AddProductState extends State<SellingForm> {
                           ),
                         ),
                         prefixIcon: const Icon(
-                          Icons.monetization_on, // Adjust icon as needed
+                          Icons.monetization_on,
                           color: Colors.blue,
                         ),
                       ),
@@ -317,7 +322,7 @@ class _AddProductState extends State<SellingForm> {
                     const Padding(
                       padding: EdgeInsets.only(right: 150.0),
                       child: Text(
-                        'Numéro du revendeur',
+                        'Code du vendeur',
                         textAlign: TextAlign.start,
                         style: TextStyle(
                             color: Colors.blue, fontWeight: FontWeight.bold),
@@ -327,11 +332,10 @@ class _AddProductState extends State<SellingForm> {
                       height: 10,
                     ),
                     TextField(
-                      controller: _sellerPhoneNumber,
+                      controller: _userId,
                       cursorColor: Colors.grey,
-                      enabled: true,
+                      enabled: false,
                       decoration: InputDecoration(
-                        // hintText: '0900000000',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(50),
                         ),
@@ -346,10 +350,63 @@ class _AddProductState extends State<SellingForm> {
                           ),
                         ),
                         prefixIcon: const Icon(
-                          Icons.phone, // Adjust icon as needed
+                          Icons.circle,
                           color: Colors.blue,
                         ),
                       ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(right: 150.0),
+                      child: Text(
+                        'Nom du client',
+                        textAlign: TextAlign.start,
+                        style: TextStyle(
+                            color: Colors.blue, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    DropdownButtonFormField<Client>(
+                      // controller: _clientId,
+                      // cursorColor: Colors.grey,
+                      // enabled: false,
+                      value: selectedClient,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(60.0),
+                          borderSide: const BorderSide(color: Colors.blue),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(80.0),
+                          borderSide: const BorderSide(
+                            color: Colors.grey,
+                          ),
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.circle_outlined,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      items: clients.isEmpty
+                          ? []
+                          : clients.map((Client client) {
+                              return DropdownMenuItem<Client>(
+                                value: client,
+                                child: Text(client.fullName),
+                              );
+                            }).toList(),
+                      onChanged: (Client? newClient) {
+                        setState(() {
+                          selectedClient = newClient;
+                        });
+                      },
                     ),
                     const SizedBox(
                       height: 16,
@@ -360,8 +417,8 @@ class _AddProductState extends State<SellingForm> {
                         String unitPriceStr = _unitPrice.text;
                         String quantityStr = _quantity.text;
                         String totalPriceStr = _totalPrice.text;
-                        String sellerPhoneNumber = _sellerPhoneNumber.text;
-
+                        String userId = _userId.text;
+                        String clientId = selectedClient!.clientId.toString();
                         int quantity = int.tryParse(quantityStr) ?? 0;
                         double unitPrice = double.tryParse(unitPriceStr) ?? 0.0;
                         double totalPrice =
@@ -371,10 +428,19 @@ class _AddProductState extends State<SellingForm> {
                             productCode: productCode,
                             unitPrice: unitPrice,
                             totalPrice: totalPrice,
-                            sellerPhoneNumber: sellerPhoneNumber,
+                            userId: int.tryParse(userId),
+                            clientId: int.tryParse(clientId),
                             quantity: quantity);
+                        setState(() {
+                          isLoading = true;
+                        });
+                        Future.delayed(const Duration(seconds: 5), () {
+                          setState(() {
+                            isLoading = false;
+                          });
+                        });
                         SellsController().addTransaction(newTransaction, () {});
-                        _sellerPhoneNumber.clear();
+
                         _productCode.clear();
                         _totalPrice.clear();
                         _unitPrice.clear();
@@ -382,12 +448,21 @@ class _AddProductState extends State<SellingForm> {
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue),
-                      child: const Text(
-                        'Ajouter',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 238, 237, 237),
-                        ),
-                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              'Ajouter',
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 238, 237, 237),
+                              ),
+                            ),
                     )
                   ],
                 ),

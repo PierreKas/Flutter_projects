@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter/widgets.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pharmacy/controllers/products_controller.dart';
 
 import 'package:pharmacy/models/products.dart';
@@ -23,8 +21,18 @@ class _AddProductState extends State<AddProduct> {
   final TextEditingController _quantity = TextEditingController();
 
   final TextEditingController _expiryDate = TextEditingController();
+  bool isLoading = false;
 
   DateTime? _selectedDate;
+  @override
+  void dispose() {
+    _productCode.dispose();
+    _productName.dispose();
+    _purchasePrice.dispose();
+    _quantity.dispose();
+    _expiryDate.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -304,9 +312,16 @@ class _AddProductState extends State<AddProduct> {
                             purchasePrice: purchasePrice,
                             expiryDate: expiryDate,
                             quantity: quantity);
-                        ProductsController().addProduct(newProduct, () {
-                          Fluttertoast.showToast(msg: 'Produit ajouté');
+                        setState(() {
+                          isLoading = true;
                         });
+                        Future.delayed(const Duration(seconds: 5), () {
+                          setState(() {
+                            isLoading = false;
+                          });
+                        });
+
+                        ProductsController().addProduct(newProduct, () {});
                         _expiryDate.clear();
                         _productCode.clear();
                         _productName.clear();
@@ -315,12 +330,21 @@ class _AddProductState extends State<AddProduct> {
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue),
-                      child: const Text(
-                        'Ajouter',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 238, 237, 237),
-                        ),
-                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              'Ajouter',
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 238, 237, 237),
+                              ),
+                            ),
                     )
                   ],
                 ),

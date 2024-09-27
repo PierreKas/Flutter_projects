@@ -21,7 +21,7 @@ class ProductsList extends StatefulWidget {
 class _ProductsListState extends State<ProductsList> {
   final ScrollController _scrollController = ScrollController();
   double _floattingButOpacity = 1.0;
-
+  bool isLoading = true;
   @override
   void initState() {
     // TODO: implement initState
@@ -30,6 +30,12 @@ class _ProductsListState extends State<ProductsList> {
     _scrollController.addListener(() {
       _handleScroll();
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _handleScroll() {
@@ -48,7 +54,9 @@ class _ProductsListState extends State<ProductsList> {
 
   void _fetchProducts() async {
     await ProductsController().getProducts(() {
-      setState(() {});
+      setState(() {
+        isLoading = false;
+      });
     });
   }
 
@@ -113,9 +121,10 @@ class _ProductsListState extends State<ProductsList> {
                     Table(
                         border: TableBorder.all(color: Colors.black),
                         columnWidths: const {
-                          0: FlexColumnWidth(1.5),
+                          0: FlexColumnWidth(1),
                           1: FlexColumnWidth(1.5),
                           2: FlexColumnWidth(1.5),
+                          3: FlexColumnWidth(1.5),
                         },
                         children: const [
                           TableRow(
@@ -125,7 +134,7 @@ class _ProductsListState extends State<ProductsList> {
                                 Padding(
                                   padding: EdgeInsets.all(16),
                                   child: Text(
-                                    'Product name',
+                                    'Code',
                                     style: TextStyle(
                                         fontSize: 12, color: Colors.black),
                                   ),
@@ -133,7 +142,7 @@ class _ProductsListState extends State<ProductsList> {
                                 Padding(
                                   padding: EdgeInsets.all(16),
                                   child: Text(
-                                    'Purchase price',
+                                    'Nom',
                                     style: TextStyle(
                                         fontSize: 12, color: Colors.black),
                                   ),
@@ -141,7 +150,15 @@ class _ProductsListState extends State<ProductsList> {
                                 Padding(
                                   padding: EdgeInsets.all(16),
                                   child: Text(
-                                    'Quantity',
+                                    'Prix d\'achat',
+                                    style: TextStyle(
+                                        fontSize: 12, color: Colors.black),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Text(
+                                    'Quantité',
                                     style: TextStyle(
                                         fontSize: 12, color: Colors.black),
                                   ),
@@ -159,69 +176,91 @@ class _ProductsListState extends State<ProductsList> {
                         return false;
                       },
                       child: Expanded(
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          itemCount: ProductsController.productsList.length,
-                          itemBuilder: (context, index) {
-                            Product product =
-                                ProductsController.productsList[index];
-                            print('Rendering product: ${product.productName}');
+                        child: isLoading
+                            ? const Center(
+                                child: CircularProgressIndicator(
+                                    color: Colors.blue, strokeWidth: 5.0),
+                              )
+                            : ListView.builder(
+                                controller: _scrollController,
+                                itemCount:
+                                    ProductsController.productsList.length,
+                                itemBuilder: (context, index) {
+                                  Product product =
+                                      ProductsController.productsList[index];
+                                  print(
+                                      'Rendering product: ${product.productName}');
 
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: Table(
-                                border: TableBorder.all(color: Colors.black),
-                                columnWidths: const {
-                                  0: FlexColumnWidth(1.5),
-                                  1: FlexColumnWidth(1.5),
-                                  2: FlexColumnWidth(1.5),
-                                },
-                                children: [
-                                  TableRow(children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        final prCode = product.productCode;
-                                        Colors.blue;
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => ProductInfo(
-                                                productCode: prCode),
-                                          ),
-                                        );
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Table(
+                                      border:
+                                          TableBorder.all(color: Colors.black),
+                                      columnWidths: const {
+                                        0: FlexColumnWidth(1),
+                                        1: FlexColumnWidth(1.5),
+                                        2: FlexColumnWidth(1.5),
+                                        3: FlexColumnWidth(1.5),
                                       },
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16),
-                                        child: Text(
-                                          product.productName,
-                                          style: const TextStyle(
-                                              fontSize: 10,
-                                              color: Colors.black),
-                                        ),
-                                      ),
+                                      children: [
+                                        TableRow(children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(16),
+                                            child: Text(
+                                              product.productCode,
+                                              style: const TextStyle(
+                                                  fontSize: 10,
+                                                  color: Colors.black),
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              final prCode =
+                                                  product.productCode;
+                                              Colors.blue;
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ProductInfo(
+                                                          productCode: prCode),
+                                                ),
+                                              );
+                                            },
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(16),
+                                              child: Text(
+                                                product.productName,
+                                                style: const TextStyle(
+                                                    fontSize: 10,
+                                                    color: Colors.black),
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(16),
+                                            child: Text(
+                                              product.purchasePrice.toString(),
+                                              style: const TextStyle(
+                                                  fontSize: 10,
+                                                  color: Colors.black),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(18),
+                                            child: Text(
+                                              product.quantity.toString(),
+                                              style: const TextStyle(
+                                                  fontSize: 10,
+                                                  color: Colors.black),
+                                            ),
+                                          )
+                                        ]),
+                                      ],
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(16),
-                                      child: Text(
-                                        product.purchasePrice.toString(),
-                                        style: const TextStyle(
-                                            fontSize: 10, color: Colors.black),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(18),
-                                      child: Text(
-                                        product.quantity.toString(),
-                                        style: const TextStyle(
-                                            fontSize: 10, color: Colors.black),
-                                      ),
-                                    )
-                                  ]),
-                                ],
+                                  );
+                                },
                               ),
-                            );
-                          },
-                        ),
                       ),
                     ),
                   ],
