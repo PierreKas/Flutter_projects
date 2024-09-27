@@ -60,7 +60,7 @@ Security:
 ====> Secured
 
 2. SQL injection
-====> vulnerable
+====> vulnerable on login
 
 3. Store sensitive data securely
 I must use "flutter_secure_storage" package to store sensitive data
